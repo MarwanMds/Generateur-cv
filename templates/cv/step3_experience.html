@@ -1,0 +1,249 @@
+{% extends 'cv/step_base.html' %}
+{% load static %}
+{% block title %}Step 3: Experience — CV Generator{% endblock %}
+
+{% block step_content %}
+<form method="post" novalidate id="step3-form">
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  <div class="form-card">
+    <div class="form-card-title"><i class="bi bi-briefcase"></i> Work Experience</div>
+    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.2rem;">
+      Add your work history. Most recent position first.
+    </p>
+
+    <div id="experience-entries">
+      {% for form in formset %}
+      <div class="formset-entry">
+        {% if formset.can_delete %}
+        <div class="delete-row">
+          {{ form.DELETE }}
+          <label for="{{ form.DELETE.id_for_label }}">Remove</label>
+        </div>
+        {% endif %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Job Title <span class="text-danger">*</span></label>
+            <div class="field-with-styler" data-field-group="exp_pos_{{ forloop.counter0 }}">
+              {{ form.position }}
+              <button type="button" class="field-style-toggle" data-field="exp_pos_{{ forloop.counter0 }}" title="Style"><i class="bi bi-type"></i></button>
+              {% include 'cv/partials/styler_popover.html' with field_key="exp_pos_"|add:forloop.counter0|stringformat:"s" label="Job Title" %}
+            </div>
+            {% if form.position.errors %}<div class="text-danger mt-1" style="font-size:.82rem">{{ form.position.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Company <span class="text-danger">*</span></label>
+            <div class="field-with-styler" data-field-group="exp_co_{{ forloop.counter0 }}">
+              {{ form.company }}
+              <button type="button" class="field-style-toggle" data-field="exp_co_{{ forloop.counter0 }}" title="Style"><i class="bi bi-type"></i></button>
+              {% include 'cv/partials/styler_popover.html' with field_key="exp_co_"|add:forloop.counter0|stringformat:"s" label="Company" %}
+            </div>
+            {% if form.company.errors %}<div class="text-danger mt-1" style="font-size:.82rem">{{ form.company.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Location</label>
+            <div class="field-with-styler" data-field-group="exp_loc_{{ forloop.counter0 }}">
+              {{ form.company_location }}
+              <button type="button" class="field-style-toggle" data-field="exp_loc_{{ forloop.counter0 }}" title="Style"><i class="bi bi-type"></i></button>
+              {% include 'cv/partials/styler_popover.html' with field_key="exp_loc_"|add:forloop.counter0|stringformat:"s" label="Location" %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Employment Type</label>
+            {{ form.employment_type }}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Start Date <span class="text-danger">*</span></label>
+            {{ form.start_date }}
+            {% if form.start_date.errors %}<div class="text-danger mt-1" style="font-size:.82rem">{{ form.start_date.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">End Date</label>
+            {{ form.end_date }}
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check mb-2">
+              {{ form.is_current }}
+              <label class="form-check-label ms-1" for="{{ form.is_current.id_for_label }}">Current job</label>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            {{ form.description }}
+            <div class="form-text">Describe responsibilities, achievements, technologies used.</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ─── Template for new entries (injected via JS) ─── -->
+    <template id="empty-exp-template">
+      <div class="formset-entry">
+        <div class="delete-row">
+          <input type="checkbox" name="experiences-__prefix__-DELETE" id="id_experiences-__prefix__-DELETE" class="form-check-input">
+          <label for="id_experiences-__prefix__-DELETE">Remove</label>
+        </div>
+        <input type="hidden" name="experiences-__prefix__-id" value="">
+        <input type="hidden" name="experiences-__prefix__-cv" value="{{ cv.pk }}">
+        <div class="row g-3 mt-1">
+
+          <div class="col-md-6">
+            <label class="form-label">Job Title</label>
+            <div class="field-with-styler" data-field-group="exp_pos___prefix__">
+              <input type="text" name="experiences-__prefix__-position" class="form-control" placeholder="e.g. Software Engineer">
+              <button type="button" class="field-style-toggle" data-field="exp_pos___prefix__" title="Style"><i class="bi bi-type"></i></button>
+              <!-- inline mini-popover for new entry -->
+              <div class="field-styler-popover" id="styler-exp_pos___prefix__" data-field="exp_pos___prefix__">
+                <div class="styler-header">
+                  <span>Style — <span class="field-label-name">Job Title</span></span>
+                  <button class="styler-close" data-close="exp_pos___prefix__">&times;</button>
+                </div>
+                <div class="styler-row">
+                  <div class="styler-label">Font Family</div>
+                  <select class="form-select styler-control" data-field="exp_pos___prefix__" data-prop="font_family">
+                    <option value="">— default —</option>
+                    <option value="DM Sans">DM Sans</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Raleway">Raleway</option>
+                  </select>
+                </div>
+                <div class="styler-row">
+                  <div class="styler-label">Font Size</div>
+                  <select class="form-select styler-control" data-field="exp_pos___prefix__" data-prop="font_size">
+                    <option value="">— default —</option>
+                    <option value="10px">10px</option>
+                    <option value="12px">12px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px">16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                  </select>
+                </div>
+                <div class="styler-row">
+                  <div class="styler-label">Weight</div>
+                  <select class="form-select styler-control" data-field="exp_pos___prefix__" data-prop="font_weight">
+                    <option value="">— default —</option>
+                    <option value="300">Light</option>
+                    <option value="400">Regular</option>
+                    <option value="600">Semi-Bold</option>
+                    <option value="700">Bold</option>
+                    <option value="900">Black</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <div class="field-with-styler" data-field-group="exp_co___prefix__">
+              <input type="text" name="experiences-__prefix__-company" class="form-control" placeholder="Company name">
+              <button type="button" class="field-style-toggle" data-field="exp_co___prefix__" title="Style"><i class="bi bi-type"></i></button>
+              <div class="field-styler-popover" id="styler-exp_co___prefix__" data-field="exp_co___prefix__">
+                <div class="styler-header">
+                  <span>Style — <span class="field-label-name">Company</span></span>
+                  <button class="styler-close" data-close="exp_co___prefix__">&times;</button>
+                </div>
+                <div class="styler-row">
+                  <div class="styler-label">Font Family</div>
+                  <select class="form-select styler-control" data-field="exp_co___prefix__" data-prop="font_family">
+                    <option value="">— default —</option>
+                    <option value="DM Sans">DM Sans</option><option value="Roboto">Roboto</option>
+                    <option value="Open Sans">Open Sans</option><option value="Lato">Lato</option>
+                    <option value="Montserrat">Montserrat</option><option value="Playfair Display">Playfair Display</option>
+                    <option value="Raleway">Raleway</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Location</label>
+            <input type="text" name="experiences-__prefix__-company_location" class="form-control" placeholder="City, Country">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Employment Type</label>
+            <select name="experiences-__prefix__-employment_type" class="form-select">
+              <option value="full_time">Full-Time</option>
+              <option value="part_time">Part-Time</option>
+              <option value="internship">Internship / Stage</option>
+              <option value="freelance">Freelance / Contract</option>
+              <option value="volunteer">Volunteer</option>
+              <option value="apprentice">Apprenticeship</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="experiences-__prefix__-start_date" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">End Date</label>
+            <input type="date" name="experiences-__prefix__-end_date" class="form-control">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check mb-2">
+              <input type="checkbox" name="experiences-__prefix__-is_current" class="form-check-input">
+              <label class="form-check-label ms-1">Current job</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="experiences-__prefix__-description" class="form-control" rows="4" placeholder="Describe your responsibilities…"></textarea>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <button type="button" class="btn-add-entry" id="add-experience">
+      <i class="bi bi-plus-circle me-2"></i>Add Another Position
+    </button>
+  </div>
+
+  <div class="step-nav">
+    <a href="{% url 'cv:step' pk=cv.pk step=2 %}" class="btn-step-back">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <div class="d-flex gap-2">
+      <button type="submit" name="save_exit" class="btn-save-exit">
+        <i class="bi bi-floppy me-1"></i>Save & Exit
+      </button>
+      <button type="submit" class="btn-step-next">
+        Next: Skills <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block step_js %}
+<script>
+  // cv_preview.js handles all live preview updates via window.refreshExpPreview.
+  // We only need the "Add" button logic here.
+  let expCount = {{ formset.total_form_count }};
+
+  document.getElementById('add-experience').addEventListener('click', function () {
+    const tmpl  = document.getElementById('empty-exp-template').content.cloneNode(true);
+    const entry = tmpl.querySelector('.formset-entry');
+    entry.innerHTML = entry.innerHTML.replace(/__prefix__/g, expCount);
+    document.getElementById('experience-entries').appendChild(entry);
+    document.getElementById('id_experiences-TOTAL_FORMS').value = ++expCount;
+    // Refresh preview after DOM insertion (MutationObserver in cv_preview.js also catches it)
+    if (window.refreshExpPreview) window.refreshExpPreview();
+  });
+</script>
+{% endblock %}

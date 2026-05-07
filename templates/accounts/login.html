@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Sign In — CV Generator{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-wrapper {
+    min-height: calc(100vh - 130px);
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+  }
+  .auth-card { max-width: 420px; width: 100%; margin: 0 auto; }
+  .auth-header { text-align: center; margin-bottom: 2rem; }
+  .auth-logo { font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: var(--primary); }
+  .auth-logo span { color: var(--accent); }
+  .auth-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--primary); margin-top: 1rem; }
+  .auth-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+  .card-body { padding: 2rem 2.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="container">
+    <div class="auth-card">
+
+      <div class="auth-header">
+        <div class="auth-logo">CV<span>.</span>Gen</div>
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to continue building your CV.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+              {{ form.username|add_class:"form-control" }}
+              {% if form.username.errors %}
+                <div class="text-danger mt-1" style="font-size:0.82rem;">{{ form.username.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-1">
+              <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+              {{ form.password|add_class:"form-control" }}
+              {% if form.password.errors %}
+                <div class="text-danger mt-1" style="font-size:0.82rem;">{{ form.password.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 mt-3 mb-0" style="font-size:0.88rem;">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-end mb-3 mt-2">
+              <a href="{% url 'accounts:password_change' %}" style="font-size:0.82rem;color:var(--text-muted);">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <p class="text-center mt-3" style="font-size:0.9rem;color:var(--text-muted);">
+        Don't have an account?
+        <a href="{% url 'accounts:register' %}" style="color:var(--accent);font-weight:600;">Create one free</a>
+      </p>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

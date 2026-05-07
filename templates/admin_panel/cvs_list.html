@@ -1,0 +1,166 @@
+{% extends 'base.html' %} {% block title %}All CVs — Admin Panel{% endblock %} {% block extra_css %}
+<style>
+    .admin-header {
+        background: var(--primary);
+        padding: 2rem 0;
+        color: #fff;
+    }
+    
+    .admin-title {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+    
+    .admin-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: .5rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-nav .nav-link {
+        color: var(--text-muted) !important;
+        font-size: .9rem;
+        font-weight: 500;
+        padding: .4rem 1rem !important;
+        border-radius: 6px;
+    }
+    
+    .admin-nav .nav-link:hover,
+    .admin-nav .nav-link.active {
+        color: var(--primary) !important;
+        background: var(--surface);
+    }
+    
+    .admin-nav .nav-link i {
+        margin-right: .4rem;
+    }
+    
+    .table th {
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--text-muted);
+        font-weight: 600;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .table td {
+        vertical-align: middle;
+        font-size: .9rem;
+    }
+    
+    .badge-complete {
+        background: rgba(34, 197, 94, .1);
+        color: #16a34a;
+        border-radius: 20px;
+        padding: .2rem .7rem;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+    
+    .badge-draft {
+        background: rgba(230, 57, 70, .1);
+        color: var(--accent);
+        border-radius: 20px;
+        padding: .2rem .7rem;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+    
+    .cv-template-badge {
+        display: inline-block;
+        background: rgba(26, 26, 46, .07);
+        color: var(--primary);
+        border-radius: 20px;
+        padding: .15rem .6rem;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="admin-header">
+    <div class="container">
+        <div class="admin-title"><i class="bi bi-shield-fill-check me-2" style="color:var(--accent)"></i>Admin Panel</div>
+    </div>
+</div>
+
+<div class="admin-nav">
+    <div class="container">
+        <nav class="d-flex gap-1">
+            <a href="{% url 'admin_panel:overview' %}" class="nav-link"><i class="bi bi-speedometer2"></i>Overview</a>
+            <a href="{% url 'admin_panel:users_list' %}" class="nav-link"><i class="bi bi-people"></i>Users</a>
+            <a href="{% url 'admin_panel:cvs_list' %}" class="nav-link active"><i class="bi bi-file-earmark-person"></i>CVs</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="card">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h5 style="font-family:var(--font-display);font-weight:700;margin:0;">All CVs</h5>
+                <form method="get" class="d-flex gap-2">
+                    <input type="text" name="q" value="{{ search }}" class="form-control form-control-sm" placeholder="Search CVs..." style="width:220px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Search</button> {% if search %}<a href="{% url 'admin_panel:cvs_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>{% endif %}
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Owner</th>
+                            <th>Template</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cv in cvs %}
+                        <tr>
+                            <td>
+                                <div style="font-weight:600;">{{ cv.title }}</div>
+                                {% if cv.full_name %}
+                                <div style="font-size:.78rem;color:var(--text-muted);">{{ cv.full_name }}</div>{% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_panel:user_detail' cv.user.pk %}" style="color:var(--primary);font-weight:500;">
+                  {{ cv.user.username }}
+                </a>
+                            </td>
+                            <td><span class="cv-template-badge">{{ cv.get_template_display }}</span></td>
+                            <td>
+                                {% if cv.is_complete %}
+                                <span class="badge-complete"><i class="bi bi-check-circle-fill me-1"></i>Complete</span> {% else %}
+                                <span class="badge-draft"><i class="bi bi-clock me-1"></i>Step {{ cv.current_step }}/5</span> {% endif %}
+                            </td>
+                            <td style="font-size:.82rem;color:var(--text-muted);">{{ cv.updated_at|date:"d M Y" }}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'admin_panel:cv_preview' cv_id=cv.pk %}" class="btn btn-sm btn-outline-secondary" title="Preview">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'admin_panel:cv_delete' cv.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No CVs found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

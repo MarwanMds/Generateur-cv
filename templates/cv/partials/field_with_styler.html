@@ -1,0 +1,10 @@
+<div class="field-with-styler" data-field-group="{{ field_key }}">
+  {{ field }}
+  <button type="button"
+          class="field-style-toggle"
+          data-field="{{ field_key }}"
+          title="Customize typography for this field">
+    <i class="bi bi-type"></i>
+  </button>
+  {% include 'cv/partials/styler_popover.html' with field_key=field_key label=label %}
+</div>

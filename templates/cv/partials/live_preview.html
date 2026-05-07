@@ -1,0 +1,137 @@
+<div class="preview-sticky">
+    <div class="preview-label">
+        <i class="bi bi-eye me-1"></i> Live Preview
+    </div>
+
+    <div id="cv-preview-panel" class="tmpl-{{ cv.template|default:'modern' }}" style="--cv-primary:{{ cv.primary_color|default:'#1a1a2e' }};--cv-secondary:{{ cv.secondary_color|default:'#e63946' }};">
+
+        <!-- ── Sidebar (Modern template) ── -->
+        <div class="preview-sidebar">
+            <div class="prev-photo-wrap">
+                {% if cv.profile_photo %}
+                <img id="prev-photo" src="{{ cv.profile_photo.url }}" alt="" style="display:block;">
+                <span id="prev-initials" style="display:none;">{{ cv.full_name|first|upper }}</span> {% else %}
+                <img id="prev-photo" src="" alt="" style="display:none;">
+                <span id="prev-initials">
+            {{ cv.full_name|first|upper }}{% with parts=cv.full_name.split %}{% if parts|length > 1 %}{{ parts|last|first|upper }}{% endif %}{% endwith %}
+          </span> {% endif %}
+            </div>
+
+            <!-- Contact items -->
+            <div class="prev-section-label" style="margin-top:0;">Contact</div>
+            <div id="wrap-email" class="prev-contact-item" {% if not cv.email %}style="display:none" {% endif %}>
+                <i class="bi bi-envelope-fill prev-icon"></i><span id="prev-email">{{ cv.email }}</span>
+            </div>
+            <div id="wrap-phone" class="prev-contact-item" {% if not cv.phone %}style="display:none" {% endif %}>
+                <i class="bi bi-telephone-fill prev-icon"></i><span id="prev-phone">{{ cv.phone }}</span>
+            </div>
+            <div id="wrap-city" class="prev-contact-item" {% if not cv.city %}style="display:none" {% endif %}>
+                <i class="bi bi-geo-alt-fill prev-icon"></i><span id="prev-city">{{ cv.city }}</span><span id="prev-country">{% if cv.country %}, {{ cv.country }}{% endif %}</span>
+            </div>
+            <div id="wrap-linkedin" class="prev-contact-item" {% if not cv.linkedin %}style="display:none" {% endif %}>
+                <i class="bi bi-linkedin prev-icon"></i><span id="prev-linkedin">{{ cv.linkedin }}</span>
+            </div>
+            <div id="wrap-github" class="prev-contact-item" {% if not cv.github %}style="display:none" {% endif %}>
+                <i class="bi bi-github prev-icon"></i><span id="prev-github">{{ cv.github }}</span>
+            </div>
+            <div id="wrap-website" class="prev-contact-item" {% if not cv.website %}style="display:none" {% endif %}>
+                <i class="bi bi-globe prev-icon"></i><span id="prev-website">{{ cv.website }}</span>
+            </div>
+
+            <!-- Skills block — rebuilt live on step 4, seeded from DB on steps 1-3 -->
+            <div id="prev-skills-block">
+                <div class="prev-section-label">Skills</div>
+                {% with skills=cv.skills.all %} {% if skills %} {% for s in skills %}
+                <div class="prev-skill-item">{{ s.name }}</div>
+                {% endfor %} {% else %}
+                <div class="prev-placeholder-line" style="width:80%"></div>
+                <div class="prev-placeholder-line" style="width:65%"></div>
+                <div class="prev-placeholder-line" style="width:75%"></div>
+                {% endif %} {% endwith %}
+            </div>
+
+            <!-- Languages block -->
+            <div id="prev-langs-block">
+                {% with langs=cv.languages.all %} {% if langs %}
+                <div class="prev-section-label">Languages</div>
+                {% for l in langs %}
+                <div class="prev-skill-item">{{ l.name }} <span style="opacity:.55;font-size:.75em;">{{ l.get_level_display }}</span></div>
+                {% endfor %} {% endif %} {% endwith %}
+            </div>
+
+            <!-- Interests block (populated by JS on step 4) -->
+            <div id="prev-interests-block">
+                {% with interests=cv.interests.all %} {% if interests %}
+                <div class="prev-section-label">Interests</div>
+                {% for item in interests %}
+                <div class="prev-skill-item">{{ item.name }}</div>
+                {% endfor %} {% endif %} {% endwith %}
+            </div>
+        </div>
+
+        <!-- ── Main area ── -->
+        <div class="preview-main">
+
+            <!-- Header: name + role + classic contact row -->
+            <div class="preview-header-classic">
+                <div class="prev-name" id="prev-name">{{ cv.full_name|default:"Your Name" }}</div>
+
+                <div id="wrap-role" {% if not cv.job_title %}style="display:none" {% endif %}>
+                    <div class="prev-role" id="prev-role">{{ cv.job_title }}</div>
+                </div>
+
+                <!-- Classic / Minimal template contact row -->
+                <div class="prev-contact-row-classic">
+                    <span id="prev-email-classic">{{ cv.email }}</span>
+                    <span class="prev-sep" id="sep-phone" {% if not cv.phone %}style="display:none" {% endif %}>·</span>
+                    <span id="prev-phone-classic">{{ cv.phone }}</span>
+                    <span class="prev-sep" id="sep-city" {% if not cv.city %}style="display:none" {% endif %}>·</span>
+                    <span id="prev-city-classic">{{ cv.city }}</span>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div id="wrap-summary" {% if not cv.summary %}style="display:none" {% endif %}>
+                <div class="prev-section-label">Profile</div>
+                <div class="prev-summary-text" id="prev-summary">{{ cv.summary }}</div>
+            </div>
+
+            <!-- Experience block — rebuilt live on step 3 -->
+            <div id="prev-exp-block">
+                <div class="prev-section-label">Experience</div>
+                {% with exps=cv.experiences.all %} {% if exps %} {% for e in exps %}
+                <div class="prev-data-row">
+                    <div class="prev-data-title">{{ e.position }}</div>
+                    <div class="prev-data-sub">{{ e.company }}{% if e.company_location %} · {{ e.company_location }}{% endif %}</div>
+                    <div class="prev-data-date">{{ e.start_date|date:"M Y" }} — {{ e.end_display }}</div>
+                </div>
+                {% endfor %} {% else %}
+                <div class="prev-placeholder-line" style="width:60%"></div>
+                <div class="prev-placeholder-line" style="width:90%"></div>
+                {% endif %} {% endwith %}
+            </div>
+
+            <!-- Education block — rebuilt live on step 2 -->
+            <div id="prev-edu-block">
+                <div class="prev-section-label">Education</div>
+                {% with edus=cv.educations.all %} {% if edus %} {% for ed in edus %}
+                <div class="prev-data-row">
+                    <div class="prev-data-title">{{ ed.get_degree_display }}{% if ed.field_of_study %} — {{ ed.field_of_study }}{% endif %}</div>
+                    <div class="prev-data-sub">{{ ed.institution }}{% if ed.institution_location %} · {{ ed.institution_location }}{% endif %}</div>
+                    <div class="prev-data-date">{{ ed.start_date|date:"M Y" }} — {{ ed.end_display }}</div>
+                </div>
+                {% endfor %} {% else %}
+                <div class="prev-placeholder-line" style="width:70%"></div>
+                <div class="prev-placeholder-line" style="width:85%"></div>
+                {% endif %} {% endwith %}
+            </div>
+
+        </div>
+        <!-- /.preview-main -->
+    </div>
+    <!-- /#cv-preview-panel -->
+
+    <div class="preview-hint">
+        <i class="bi bi-info-circle me-1"></i> Updates as you type
+    </div>
+</div>

@@ -1,0 +1,198 @@
+{% extends 'base.html' %} {% block title %}{{ target_user.username }} — Admin Panel{% endblock %} {% block extra_css %}
+<style>
+    .admin-header {
+        background: var(--primary);
+        padding: 2rem 0;
+        color: #fff;
+    }
+    
+    .admin-title {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+    
+    .admin-nav {
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: .5rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-nav .nav-link {
+        color: var(--text-muted) !important;
+        font-size: .9rem;
+        font-weight: 500;
+        padding: .4rem 1rem !important;
+        border-radius: 6px;
+    }
+    
+    .admin-nav .nav-link:hover {
+        color: var(--primary) !important;
+        background: var(--surface);
+    }
+    
+    .admin-nav .nav-link i {
+        margin-right: .4rem;
+    }
+    
+    .info-label {
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: .2rem;
+    }
+    
+    .info-value {
+        font-size: .95rem;
+        color: var(--primary);
+        font-weight: 500;
+    }
+    
+    .cv-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.2rem;
+        transition: all .2s;
+    }
+    
+    .cv-card:hover {
+        box-shadow: var(--shadow);
+    }
+    
+    .cv-template-badge {
+        display: inline-block;
+        background: rgba(230, 57, 70, .1);
+        color: var(--accent);
+        border-radius: 20px;
+        padding: .15rem .7rem;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="admin-header">
+    <div class="container">
+        <div class="admin-title"><i class="bi bi-shield-fill-check me-2" style="color:var(--accent)"></i>Admin Panel</div>
+    </div>
+</div>
+
+<div class="admin-nav">
+    <div class="container">
+        <nav class="d-flex gap-1">
+            <a href="{% url 'admin_panel:overview' %}" class="nav-link"><i class="bi bi-speedometer2"></i>Overview</a>
+            <a href="{% url 'admin_panel:users_list' %}" class="nav-link active"><i class="bi bi-people"></i>Users</a>
+            <a href="{% url 'admin_panel:cvs_list' %}" class="nav-link"><i class="bi bi-file-earmark-person"></i>CVs</a>
+        </nav>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="mb-3">
+        <a href="{% url 'admin_panel:users_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Users
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile Info -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div style="width:72px;height:72px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem;font-weight:900;margin:0 auto .8rem;">
+                            {{ target_user.first_name|first|upper }}{{ target_user.last_name|first|upper }}
+                        </div>
+                        <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;">{{ target_user.get_full_name|default:target_user.username }}</div>
+                        <div style="font-size:.85rem;color:var(--text-muted);">@{{ target_user.username }}</div>
+                        {% if target_user.is_staff %}
+                        <span style="display:inline-block;background:rgba(230,57,70,.1);color:var(--accent);border-radius:20px;padding:.2rem .8rem;font-size:.75rem;font-weight:600;margin-top:.5rem;">
+              <i class="bi bi-shield-fill me-1"></i>Admin
+            </span> {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ target_user.email }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Joined</div>
+                        <div class="info-value">{{ target_user.date_joined|date:"d M Y" }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">{{ target_user.last_login|date:"d M Y H:i"|default:"Never" }}</div>
+                    </div>
+                    {% if target_user.profile.headline %}
+                    <div class="mb-3">
+                        <div class="info-label">Headline</div>
+                        <div class="info-value">{{ target_user.profile.headline }}</div>
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="d-grid gap-2">
+                        <form method="post" action="{% url 'admin_panel:user_toggle_staff' target_user.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-warning w-100 btn-sm">
+                <i class="bi bi-{% if target_user.is_staff %}person-dash{% else %}shield-plus{% endif %} me-1"></i>
+                {% if target_user.is_staff %}Demote to User{% else %}Promote to Admin{% endif %}
+              </button>
+                        </form>
+                        <a href="{% url 'admin_panel:user_delete' target_user.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Delete User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CVs -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h6 style="font-family:var(--font-display);font-weight:700;margin-bottom:1.2rem;">
+                        CVs ({{ cvs.count }})
+                    </h6>
+                    {% if cvs %}
+                    <div class="row g-3">
+                        {% for cv in cvs %}
+                        <div class="col-md-6">
+                            <div class="cv-card">
+                                <div class="cv-template-badge mb-2">{{ cv.get_template_display }}</div>
+                                <div style="font-weight:700;font-size:.95rem;">{{ cv.title }}</div>
+                                {% if cv.full_name %}
+                                <div style="font-size:.82rem;color:var(--text-muted);">{{ cv.full_name }}</div>{% endif %}
+                                <div style="font-size:.78rem;color:var(--text-muted);margin:.4rem 0 .8rem;">
+                                    Updated {{ cv.updated_at|date:"d M Y" }} {% if cv.is_complete %} · <span style="color:#22c55e;font-weight:600;">Complete</span> {% else %} · <span style="color:var(--accent);">Step {{ cv.current_step }}/5</span> {%
+                                    endif %}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'admin_panel:cv_preview' cv_id=cv.pk %}" class="btn btn-sm btn-outline-secondary flex-fill">
+                                        <i class="bi bi-eye me-1"></i>Preview
+                                    </a>
+                                    <form method="post" action="{% url 'admin_panel:cv_delete' cv.pk %}" onsubmit="return confirm('Delete this CV?')">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">This user has no CVs.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

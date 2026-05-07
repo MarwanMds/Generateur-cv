@@ -1,0 +1,516 @@
+{% extends 'base.html' %} {% block title %}CV Generator — Build Your Professional CV{% endblock %} {% block extra_css %}
+<style>
+    /* Hero */
+    
+    .hero {
+        background: var(--primary);
+        color: #fff;
+        padding: 5rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 70% 50%, rgba(230, 57, 70, 0.18) 0%, transparent 65%);
+    }
+    
+    .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -1px;
+    }
+    
+    .hero-title span {
+        color: var(--accent);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.75);
+        max-width: 520px;
+        line-height: 1.6;
+    }
+    
+    .hero-badge {
+        display: inline-block;
+        background: rgba(230, 57, 70, 0.2);
+        color: var(--accent-light);
+        border: 1px solid rgba(230, 57, 70, 0.3);
+        border-radius: 50px;
+        padding: 0.3rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 1.2rem;
+    }
+    
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn-hero-primary {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.8rem 2rem;
+        border-radius: 10px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-hero-primary:hover {
+        background: var(--accent-light);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(230, 57, 70, 0.35);
+    }
+    
+    .btn-hero-outline {
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.8rem 2rem;
+        border-radius: 10px;
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-hero-outline:hover {
+        border-color: #fff;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    /* Mock CV preview card in hero */
+    
+    .hero-preview {
+        background: #fff;
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        max-width: 320px;
+        margin: 0 auto;
+        transform: rotate(2deg);
+        position: relative;
+    }
+    
+    .hero-preview::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        border-radius: 18px;
+        border: 2px solid rgba(230, 57, 70, 0.25);
+        z-index: -1;
+    }
+    
+    .preview-header {
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .preview-name {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .preview-role {
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+    }
+    
+    .preview-line {
+        height: 7px;
+        border-radius: 4px;
+        background: #e5e7eb;
+        margin: 5px 0;
+    }
+    
+    .preview-line.short {
+        width: 60%;
+    }
+    
+    .preview-line.accent {
+        background: rgba(230, 57, 70, 0.2);
+        width: 40%;
+    }
+    
+    .preview-section-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        margin: 0.7rem 0 0.3rem;
+    }
+    /* Features */
+    
+    .features {
+        padding: 5rem 0;
+    }
+    
+    .section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+    }
+    
+    .section-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 900;
+        color: var(--primary);
+        line-height: 1.15;
+    }
+    
+    .feature-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 2rem 1.5rem;
+        height: 100%;
+        transition: all 0.25s;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.25s;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+    }
+    
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .feature-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(230, 57, 70, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
+    }
+    
+    .feature-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-desc {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+    /* Steps */
+    
+    .steps {
+        background: var(--primary);
+        color: #fff;
+        padding: 5rem 0;
+    }
+    
+    .step-number {
+        width: 44px;
+        height: 44px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .step-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .step-desc {
+        font-size: 0.88rem;
+        color: rgba(255, 255, 255, 0.65);
+        line-height: 1.6;
+    }
+    
+    .step-connector {
+        width: 2px;
+        flex: 1;
+        background: rgba(255, 255, 255, 0.12);
+        margin: 0 21px;
+        min-height: 40px;
+    }
+    /* CTA Section */
+    
+    .cta-section {
+        padding: 5rem 0;
+    }
+    
+    .cta-box {
+        background: linear-gradient(135deg, var(--primary) 0%, #2d2d52 100%);
+        border-radius: 20px;
+        padding: 3.5rem;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: rgba(230, 57, 70, 0.12);
+    }
+    
+    .cta-title {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 900;
+    }
+</style>
+{% endblock %} {% block content %}
+
+<!-- Hero -->
+<section class="hero">
+    <div class="container position-relative">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge">Free CV Builder</div>
+                <h1 class="hero-title">
+                    Build your <span>perfect CV</span><br>in minutes.
+                </h1>
+                <p class="hero-subtitle">
+                    Professional templates, live preview, and one-click PDF export. Stand out from the crowd and land your dream job.
+                </p>
+                <div class="hero-cta">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard:index' %}" class="btn-hero-primary">
+                        <i class="bi bi-grid-1x2 me-2"></i>Go to Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:register' %}" class="btn-hero-primary">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Create My CV
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn-hero-outline">
+              Sign In
+            </a> {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-5 offset-lg-1 d-none d-lg-block">
+                <div class="hero-preview">
+                    <div class="preview-header">
+                        <div class="preview-name">MERDAS Marwan</div>
+                        <div class="preview-role">CyberSecurity Engineer</div>
+                    </div>
+                    <div class="preview-section-title">Experience</div>
+                    <div class="preview-line"></div>
+                    <div class="preview-line short"></div>
+                    <div class="preview-line" style="width:80%"></div>
+                    <div class="preview-section-title">Education</div>
+                    <div class="preview-line short"></div>
+                    <div class="preview-line" style="width:70%"></div>
+                    <div class="preview-section-title">Skills</div>
+                    <div class="d-flex gap-2 flex-wrap mt-1">
+                        <div class="preview-line accent" style="height:20px;border-radius:4px;width:55px;background:rgba(230,57,70,0.15)"></div>
+                        <div class="preview-line accent" style="height:20px;border-radius:4px;width:45px;background:rgba(230,57,70,0.1)"></div>
+                        <div class="preview-line accent" style="height:20px;border-radius:4px;width:65px;background:rgba(230,57,70,0.12)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-label">Why CV.Gen?</div>
+            <h2 class="section-title">Everything you need to<br>get hired.</h2>
+        </div>
+        <div class="row g-4">
+            {% for feature in features %}
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-{{ feature.icon }}"></i></div>
+                    <div class="feature-title">{{ feature.title }}</div>
+                    <p class="feature-desc">{{ feature.desc }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Static fallback features -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-layout-text-window"></i></div>
+                    <div class="feature-title">3 Professional Templates</div>
+                    <p class="feature-desc">Choose from Modern, Classic, and Minimalist designs — each crafted for maximum recruiter impact.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-eye"></i></div>
+                    <div class="feature-title">Live Preview</div>
+                    <p class="feature-desc">See your CV update in real-time as you type. No guessing — what you see is what you export.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-file-earmark-pdf"></i></div>
+                    <div class="feature-title">One-Click PDF Export</div>
+                    <p class="feature-desc">Download a print-ready PDF instantly. Share via link or email directly from the app.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-palette2"></i></div>
+                    <div class="feature-title">Custom Colors & Fonts</div>
+                    <p class="feature-desc">Make it yours. Choose accent colors and font families to match your personal brand.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-arrows-move"></i></div>
+                    <div class="feature-title">Drag & Drop Sections</div>
+                    <p class="feature-desc">Reorder CV sections with simple drag and drop. Put your best experience first.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-files"></i></div>
+                    <div class="feature-title">Multiple CVs</div>
+                    <p class="feature-desc">Create different CVs for different roles. Tailor each application without starting over.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="steps">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-label" style="color:var(--accent-light)">How it works</div>
+            <h2 class="section-title" style="color:#fff">Done in 5 simple steps.</h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for step in steps %}
+            <div class="col-md-4 col-lg-2">
+                <!-- dynamic -->
+            </div>
+            {% empty %}
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="d-flex flex-column gap-0">
+                    {% for s in "12345" %}
+                    <div class="d-flex gap-3">
+                        <div class="d-flex flex-column align-items-center">
+                            <div class="step-number">{{ forloop.counter }}</div>
+                            {% if not forloop.last %}
+                            <div class="step-connector"></div>{% endif %}
+                        </div>
+                        <div class="pb-3">
+                            {% if forloop.counter == 1 %}
+                            <div class="step-title">Personal Info</div>
+                            <p class="step-desc">Name, contact details, and your professional summary.</p>
+                            {% elif forloop.counter == 2 %}
+                            <div class="step-title">Education</div>
+                            <p class="step-desc">Degrees, institutions, and academic achievements.</p>
+                            {% elif forloop.counter == 3 %}
+                            <div class="step-title">Work Experience</div>
+                            <p class="step-desc">Positions, companies, and your key accomplishments.</p>
+                            {% elif forloop.counter == 4 %}
+                            <div class="step-title">Skills & Languages</div>
+                            <p class="step-desc">Technical skills, soft skills, and language proficiency.</p>
+                            {% elif forloop.counter == 5 %}
+                            <div class="step-title">Review & Export</div>
+                            <p class="step-desc">Preview your CV, customize the design, and download your PDF.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-12 col-md-4 col-lg-4 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <div style="font-family:var(--font-display);font-size:5rem;font-weight:900;color:rgba(255,255,255,0.06);line-height:1;">CV</div>
+                    <a href="{% url 'accounts:register' %}" class="btn-hero-primary d-inline-block mt-2">
+            Start for Free <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-box">
+            <div class="position-relative">
+                <h2 class="cta-title">Ready to build your CV?</h2>
+                <p style="color:rgba(255,255,255,0.7);margin-bottom:2rem;">
+                    Join thousands of job seekers who landed their dream role.
+                </p>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'accounts:register' %}" class="btn-hero-primary">
+                    <i class="bi bi-rocket-takeoff me-2"></i>Get Started — It's Free
+                </a>
+                {% else %}
+                <a href="{% url 'dashboard:index' %}" class="btn-hero-primary">
+                    <i class="bi bi-grid-1x2 me-2"></i>Go to My Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

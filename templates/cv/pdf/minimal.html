@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --accent: {{ cv.secondary_color|default:"#e63946" }};
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Arial', sans-serif; font-size: 10pt; color: #111; line-height: 1.6; padding: 2.5rem 3rem; }
+
+  .name { font-size: 22pt; font-weight: 700; letter-spacing: -1px; border-left: 4px solid var(--accent); padding-left: .7rem; }
+  .role { font-size: 10pt; color: var(--accent); font-weight: 600; margin: .3rem 0 .6rem .9rem; }
+  .contact-line { font-size: 8pt; color: #666; margin-left: .9rem; margin-bottom: 1.5rem; }
+  .contact-line span { margin-right: .8rem; }
+
+  .section { margin-bottom: 1.4rem; }
+  .section-title {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .6rem;
+  }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin-bottom: .7rem; }
+  .summary { font-size: 9.5pt; color: #333; line-height: 1.7; }
+
+  .entry { margin-bottom: .85rem; display: flex; gap: 1rem; }
+  .entry-date { font-size: 8pt; color: #999; width: 90px; flex-shrink: 0; padding-top: 1px; }
+  .entry-content { flex: 1; }
+  .entry-title { font-weight: 700; font-size: 10pt; }
+  .entry-sub { font-size: 8.5pt; color: #666; }
+  .entry-desc { font-size: 8.5pt; color: #444; margin-top: .25rem; line-height: 1.6; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .pill {
+    background: #f3f4f6;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 8pt;
+    color: #333;
+  }
+  .pill span { color: var(--accent); font-size: 7pt; }
+</style>
+</head>
+<body>
+
+<div class="name">{{ cv.full_name }}</div>
+{% if cv.job_title %}<div class="role">{{ cv.job_title }}</div>{% endif %}
+<div class="contact-line">
+  {% if cv.email %}<span>{{ cv.email }}</span>{% endif %}
+  {% if cv.phone %}<span>{{ cv.phone }}</span>{% endif %}
+  {% if cv.city %}<span>{{ cv.city }}{% if cv.country %}, {{ cv.country }}{% endif %}</span>{% endif %}
+  {% if cv.linkedin %}<span>{{ cv.linkedin }}</span>{% endif %}
+  {% if cv.github %}<span>{{ cv.github }}</span>{% endif %}
+</div>
+
+{% if cv.summary %}
+<div class="section">
+  <div class="section-title">About</div>
+  <hr class="divider">
+  <div class="summary">{{ cv.summary }}</div>
+</div>
+{% endif %}
+
+{% if experiences %}
+<div class="section">
+  <div class="section-title">Experience</div>
+  <hr class="divider">
+  {% for exp in experiences %}
+  <div class="entry">
+    <div class="entry-date">{{ exp.start_date|date:"M Y" }}<br>{{ exp.end_display }}</div>
+    <div class="entry-content">
+      <div class="entry-title">{{ exp.position }}</div>
+      <div class="entry-sub">{{ exp.company }}{% if exp.company_location %} · {{ exp.company_location }}{% endif %}</div>
+      {% if exp.description %}<div class="entry-desc">{{ exp.description }}</div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if educations %}
+<div class="section">
+  <div class="section-title">Education</div>
+  <hr class="divider">
+  {% for edu in educations %}
+  <div class="entry">
+    <div class="entry-date">{{ edu.start_date|date:"M Y" }}<br>{{ edu.end_display }}</div>
+    <div class="entry-content">
+      <div class="entry-title">{{ edu.get_degree_display }}{% if edu.field_of_study %} — {{ edu.field_of_study }}{% endif %}</div>
+      <div class="entry-sub">{{ edu.institution }}{% if edu.institution_location %} · {{ edu.institution_location }}{% endif %}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if skills %}
+<div class="section">
+  <div class="section-title">Skills</div>
+  <hr class="divider">
+  <div class="pills">
+    {% for skill in skills %}
+    <span class="pill">{{ skill.name }} <span>{{ skill.get_proficiency_display }}</span></span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if languages or interests %}
+<div class="section">
+  <div class="section-title">Languages & Interests</div>
+  <hr class="divider">
+  <div class="pills">
+    {% for lang in languages %}
+    <span class="pill">{{ lang.name }} <span>{{ lang.get_level_display }}</span></span>
+    {% endfor %}
+    {% for interest in interests %}
+    <span class="pill">{{ interest.name }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+</body>
+</html>

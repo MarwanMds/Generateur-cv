@@ -1,0 +1,92 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Users — Admin Panel{% endblock %}
+
+{% block admin_content %}
+
+<div class="admin-page-header">
+  <div>
+    <div class="admin-page-title">Users</div>
+    <div class="admin-page-subtitle">Manage all registered users</div>
+  </div>
+</div>
+
+<!-- Search -->
+<form method="get" class="admin-search">
+  <input type="text" name="q" value="{{ search }}" placeholder="Search by name, username or email...">
+  <button type="submit" class="btn btn-sm btn-primary">Search</button>
+  {% if search %}
+  <a href="{% url 'admin_panel:users' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+  {% endif %}
+</form>
+
+<div class="admin-table">
+  <table>
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>CVs</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>
+          <a href="{% url 'admin_panel:user_detail' u.pk %}"
+             style="font-weight:600;color:var(--primary);text-decoration:none;">
+            {{ u.get_full_name|default:u.username }}
+          </a>
+          <div style="font-size:.75rem;color:var(--text-muted);">@{{ u.username }}</div>
+        </td>
+        <td style="font-size:.85rem;">{{ u.email }}</td>
+        <td>
+          {% if u.is_staff %}
+            <span class="badge-admin"><i class="bi bi-shield-fill me-1"></i>Admin</span>
+          {% else %}
+            <span class="badge-user"><i class="bi bi-person me-1"></i>User</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge-complete">{{ u.cv_count }}</span>
+        </td>
+        <td style="font-size:.82rem;color:var(--text-muted);">{{ u.date_joined|date:"d M Y" }}</td>
+        <td>
+          <div class="d-flex gap-1 flex-wrap">
+            <a href="{% url 'admin_panel:user_detail' u.pk %}"
+               class="btn btn-xs btn-outline-secondary">
+              <i class="bi bi-eye"></i>
+            </a>
+            <form method="post" action="{% url 'admin_panel:toggle_staff' u.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-xs btn-outline-primary"
+                      title="{% if u.is_staff %}Demote{% else %}Promote{% endif %}">
+                {% if u.is_staff %}
+                  <i class="bi bi-arrow-down-circle"></i>
+                {% else %}
+                  <i class="bi bi-arrow-up-circle"></i>
+                {% endif %}
+              </button>
+            </form>
+            <a href="{% url 'admin_panel:user_delete' u.pk %}"
+               class="btn btn-xs btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">
+          {% if search %}No users found for "{{ search }}"{% else %}No users registered yet{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

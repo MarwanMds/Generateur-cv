@@ -1,0 +1,129 @@
+{% extends 'cv/step_base.html' %}
+{% load static %}
+{% block title %}Step 5: Review — CV Generator{% endblock %}
+
+{% block step_content %}
+<div style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border-radius:var(--radius);padding:1.2rem 1.5rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;">
+  <i class="bi bi-check-circle-fill" style="font-size:1.8rem;"></i>
+  <div>
+    <div style="font-weight:700;font-size:1.05rem;">Your CV is ready!</div>
+    <div style="font-size:.88rem;opacity:.85;">Review everything below, then export or continue editing.</div>
+  </div>
+</div>
+
+<div class="form-card">
+
+  <!-- Personal -->
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2 style="font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin:0;">{{ cv.full_name }}</h2>
+      {% if cv.job_title %}<div style="color:var(--accent);font-weight:600;font-size:.95rem;">{{ cv.job_title }}</div>{% endif %}
+      <div style="color:var(--text-muted);font-size:.85rem;margin-top:.3rem;">
+        {{ cv.email }}
+        {% if cv.phone %} · {{ cv.phone }}{% endif %}
+        {% if cv.city %} · {{ cv.city }}{% if cv.country %}, {{ cv.country }}{% endif %}{% endif %}
+      </div>
+    </div>
+    <a href="{% url 'cv:step' pk=cv.pk step=1 %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+  </div>
+
+  {% if cv.summary %}
+  <div class="review-section">
+    <div class="review-section-title"><i class="bi bi-card-text"></i> Summary</div>
+    <p style="font-size:.92rem;line-height:1.7;margin:0;">{{ cv.summary }}</p>
+  </div>
+  {% endif %}
+
+  {% if experiences %}
+  <div class="review-section">
+    <div class="review-section-title">
+      <i class="bi bi-briefcase me-1"></i> Experience
+      <a href="{% url 'cv:step' pk=cv.pk step=3 %}" class="btn btn-sm btn-outline-secondary ms-auto" style="font-size:.75rem;padding:.2rem .6rem;">Edit</a>
+    </div>
+    {% for exp in experiences %}
+    <div class="review-item">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <div class="review-item-title">{{ exp.position }}</div>
+          <div class="review-item-sub">{{ exp.company }}{% if exp.company_location %} · {{ exp.company_location }}{% endif %}</div>
+        </div>
+        <div class="review-item-date">
+          {{ exp.start_date|date:"M Y" }} — {{ exp.end_display }}
+          <span class="ms-1 badge" style="background:rgba(230,57,70,.1);color:var(--accent);font-size:.68rem;">{{ exp.get_employment_type_display }}</span>
+        </div>
+      </div>
+      {% if exp.description %}<p style="font-size:.85rem;color:var(--text-muted);margin:.6rem 0 0;line-height:1.6;">{{ exp.description|linebreaksbr }}</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if educations %}
+  <div class="review-section">
+    <div class="review-section-title">
+      <i class="bi bi-mortarboard me-1"></i> Education
+      <a href="{% url 'cv:step' pk=cv.pk step=2 %}" class="btn btn-sm btn-outline-secondary ms-auto" style="font-size:.75rem;padding:.2rem .6rem;">Edit</a>
+    </div>
+    {% for edu in educations %}
+    <div class="review-item">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <div class="review-item-title">{{ edu.get_degree_display }}{% if edu.field_of_study %} — {{ edu.field_of_study }}{% endif %}</div>
+          <div class="review-item-sub">{{ edu.institution }}{% if edu.institution_location %} · {{ edu.institution_location }}{% endif %}</div>
+          {% if edu.grade %}<div style="font-size:.8rem;color:var(--text-muted);">{{ edu.grade }}</div>{% endif %}
+        </div>
+        <div class="review-item-date">{{ edu.start_date|date:"M Y" }} — {{ edu.end_display }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if skills %}
+  <div class="review-section">
+    <div class="review-section-title">
+      <i class="bi bi-tools me-1"></i> Skills
+      <a href="{% url 'cv:step' pk=cv.pk step=4 %}" class="btn btn-sm btn-outline-secondary ms-auto" style="font-size:.75rem;padding:.2rem .6rem;">Edit</a>
+    </div>
+    <div>
+      {% for skill in skills %}
+      <span class="skill-pill">{{ skill.name }} <span style="opacity:.6;font-size:.72rem;">{{ skill.get_proficiency_display }}</span></span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if languages %}
+  <div class="review-section">
+    <div class="review-section-title"><i class="bi bi-translate me-1"></i> Languages</div>
+    {% for lang in languages %}
+    <span class="skill-pill">{{ lang.name }} · {{ lang.get_level_display }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if interests %}
+  <div class="review-section">
+    <div class="review-section-title"><i class="bi bi-heart me-1"></i> Interests</div>
+    {% for interest in interests %}<span class="skill-pill">{{ interest.name }}</span>{% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="step-nav">
+  <a href="{% url 'cv:step' pk=cv.pk step=4 %}" class="btn-step-back">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'dashboard:index' %}" class="btn-save-exit">
+      <i class="bi bi-grid-1x2 me-1"></i>Dashboard
+    </a>
+    <a href="{% url 'export:pdf' pk=cv.pk %}" class="btn-step-next" style="text-decoration:none;">
+      <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+    </a>
+  </div>
+</div>
+{% endblock %}

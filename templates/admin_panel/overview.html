@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel — CV Generator{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-header { background: var(--primary); padding: 2rem 0; color: #fff; }
+  .admin-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 900; }
+  .admin-nav { background: #fff; border-bottom: 1px solid var(--border); padding: .5rem 0; margin-bottom: 2rem; }
+  .admin-nav .nav-link { color: var(--text-muted) !important; font-size: .9rem; font-weight: 500; padding: .4rem 1rem !important; border-radius: 6px; }
+  .admin-nav .nav-link:hover, .admin-nav .nav-link.active { color: var(--primary) !important; background: var(--surface); }
+  .admin-nav .nav-link i { margin-right: .4rem; }
+  .stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; transition: all .2s; }
+  .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  .stat-number { font-family: var(--font-display); font-size: 2.5rem; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: .8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-top: .2rem; }
+  .stat-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+  .section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; }
+  .user-row { display: flex; align-items: center; gap: .8rem; padding: .7rem 0; border-bottom: 1px solid var(--border); }
+  .user-row:last-child { border-bottom: none; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+  .user-name { font-weight: 600; font-size: .9rem; }
+  .user-meta { font-size: .78rem; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      <div>
+        <div class="admin-title"><i class="bi bi-shield-fill-check me-2" style="color:var(--accent)"></i>Admin Panel</div>
+        <div style="color:rgba(255,255,255,.65);font-size:.9rem;">Manage users, CVs and platform settings</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-nav">
+  <div class="container">
+    <nav class="d-flex gap-1">
+      <a href="{% url 'admin_panel:overview' %}" class="nav-link active"><i class="bi bi-speedometer2"></i>Overview</a>
+      <a href="{% url 'admin_panel:users_list' %}" class="nav-link"><i class="bi bi-people"></i>Users</a>
+      <a href="{% url 'admin_panel:cvs_list' %}" class="nav-link"><i class="bi bi-file-earmark-person"></i>CVs</a>
+    </nav>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Stats -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--accent)"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-number">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#3b82f6"><i class="bi bi-file-earmark-person-fill"></i></div>
+        <div class="stat-number">{{ total_cvs }}</div>
+        <div class="stat-label">Total CVs</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:#22c55e"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-number">{{ complete_cvs }}</div>
+        <div class="stat-label">Complete CVs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Recent Users -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-title mb-0">Recent Users</div>
+            <a href="{% url 'admin_panel:users_list' %}" class="btn btn-sm btn-outline-secondary">View all</a>
+          </div>
+          {% for user in recent_users %}
+          <div class="user-row">
+            <div class="user-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+            <div class="flex-grow-1">
+              <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+              <div class="user-meta">{{ user.email }} · Joined {{ user.date_joined|date:"d M Y" }}</div>
+            </div>
+            <a href="{% url 'admin_panel:user_detail' user.pk %}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </div>
+          {% empty %}
+          <p class="text-muted text-center py-3">No users yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent CVs -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-title mb-0">Recent CVs</div>
+            <a href="{% url 'admin_panel:cvs_list' %}" class="btn btn-sm btn-outline-secondary">View all</a>
+          </div>
+          {% for cv in recent_cvs %}
+          <div class="user-row">
+            <div class="user-avatar" style="background:var(--accent);border-radius:8px;">
+              <i class="bi bi-file-earmark-text" style="font-size:.9rem;"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="user-name">{{ cv.title }}</div>
+              <div class="user-meta">{{ cv.user.username }} · {{ cv.get_template_display }} · {{ cv.updated_at|date:"d M Y" }}</div>
+            </div>
+            {% if cv.is_complete %}
+            <span style="color:#22c55e;font-size:.75rem;"><i class="bi bi-check-circle-fill"></i></span>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p class="text-muted text-center py-3">No CVs yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
