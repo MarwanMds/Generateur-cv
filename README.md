@@ -284,6 +284,6 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 👨‍💻 Author
 
-Built by **Marwan MERDAS**
+Built by **Marwan MERDAS - Mohamed Reda CHOUNI - Ilyas MALIHI**
 
-[![GitHub](https://img.shields.io/badge/GitHub-@marwan-black?logo=github)](https://github.com/your-username)
+[![GitHub](https://img.shields.io/badge/GitHub-@marwanmds-black?logo=github)](https://github.com/Marwanmds)
