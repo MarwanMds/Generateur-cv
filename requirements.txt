@@ -1,0 +1,9 @@
+asgiref==3.11.1
+charset-normalizer==3.4.7
+Django==6.0.4
+django-widget-tweaks==1.5.1
+mysqlclient==2.2.8
+pillow==12.2.0
+reportlab==4.5.0
+sqlparse==0.5.5
+tzdata==2026.2

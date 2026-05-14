@@ -1,0 +1,199 @@
+{% extends 'cv/step_base.html' %} {% load static %} {% block title %}Step 2: Education — CV Generator{% endblock %} {% block step_content %}
+<form method="post" novalidate id="step2-form">
+    {% csrf_token %} {{ formset.management_form }}
+
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-mortarboard"></i> Education</div>
+        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.2rem;">
+            Add your educational background. Most recent degree first.
+        </p>
+
+        <div id="education-entries">
+            {% for form in formset %}
+            <div class="formset-entry" id="edu-entry-{{ forloop.counter0 }}">
+
+                {% if formset.can_delete %}
+                <div class="delete-row">
+                    {{ form.DELETE }}
+                    <label for="{{ form.DELETE.id_for_label }}">Remove this entry</label>
+                </div>
+                {% endif %} {% for hidden in form.hidden_fields %} {{ hidden }} {% endfor %} {% with idx=forloop.counter0|stringformat:"s" %}
+                <div class="row g-3 mt-1">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Degree <span class="text-danger">*</span></label> {% with key="edu_degree_"|add:idx %}
+                        <div class="field-with-styler" data-field-group="{{ key }}">
+                            {{ form.degree }}
+                            <button type="button" class="field-style-toggle" data-field="{{ key }}" title="Style">
+                <i class="bi bi-type"></i>
+              </button> {% include 'cv/partials/styler_popover.html' with field_key=key label="Degree" %}
+                        </div>
+                        {% endwith %} {% if form.degree.errors %}
+                        <div class="text-danger mt-1" style="font-size:.82rem">{{ form.degree.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Field of Study</label> {% with key="edu_field_"|add:idx %}
+                        <div class="field-with-styler" data-field-group="{{ key }}">
+                            {{ form.field_of_study }}
+                            <button type="button" class="field-style-toggle" data-field="{{ key }}" title="Style">
+                <i class="bi bi-type"></i>
+              </button> {% include 'cv/partials/styler_popover.html' with field_key=key label="Field of Study" %}
+                        </div>
+                        {% endwith %}
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label">Institution <span class="text-danger">*</span></label> {% with key="edu_inst_"|add:idx %}
+                        <div class="field-with-styler" data-field-group="{{ key }}">
+                            {{ form.institution }}
+                            <button type="button" class="field-style-toggle" data-field="{{ key }}" title="Style">
+                <i class="bi bi-type"></i>
+              </button> {% include 'cv/partials/styler_popover.html' with field_key=key label="Institution" %}
+                        </div>
+                        {% endwith %} {% if form.institution.errors %}
+                        <div class="text-danger mt-1" style="font-size:.82rem">{{ form.institution.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Location</label> {% with key="edu_loc_"|add:idx %}
+                        <div class="field-with-styler" data-field-group="{{ key }}">
+                            {{ form.institution_location }}
+                            <button type="button" class="field-style-toggle" data-field="{{ key }}" title="Style">
+                <i class="bi bi-type"></i>
+              </button> {% include 'cv/partials/styler_popover.html' with field_key=key label="Location" %}
+                        </div>
+                        {% endwith %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Start Date <span class="text-danger">*</span></label> {{ form.start_date }} {% if form.start_date.errors %}
+                        <div class="text-danger mt-1" style="font-size:.82rem">{{ form.start_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">End Date</label> {{ form.end_date }}
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            {{ form.is_current }}
+                            <label class="form-check-label ms-1" for="{{ form.is_current.id_for_label }}">
+                Currently enrolled
+              </label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Description</label> {{ form.description }}
+                    </div>
+
+                </div>
+                {% endwith %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <template id="empty-edu-template">
+      <div class="formset-entry">
+        <div class="delete-row">
+          <input type="checkbox" name="educations-__prefix__-DELETE" id="id_educations-__prefix__-DELETE" class="form-check-input">
+          <label for="id_educations-__prefix__-DELETE">Remove this entry</label>
+        </div>
+
+        <input type="hidden" name="educations-__prefix__-id" value="">
+        <input type="hidden" name="educations-__prefix__-cv" value="{{ cv.pk }}">
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Degree</label>
+            <select name="educations-__prefix__-degree" class="form-select">
+              {% for val, lbl in formset.empty_form.degree.field.choices %}
+                <option value="{{ val }}">{{ lbl }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Field of Study</label>
+            <input type="text" name="educations-__prefix__-field_of_study" class="form-control" placeholder="e.g. Computer Science">
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label">Institution</label>
+            <input type="text" name="educations-__prefix__-institution" class="form-control" placeholder="University name">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Location</label>
+            <input type="text" name="educations-__prefix__-institution_location" class="form-control" placeholder="City, Country">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="educations-__prefix__-start_date" class="form-control">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">End Date</label>
+            <input type="date" name="educations-__prefix__-end_date" class="form-control">
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check mb-2">
+              <input type="checkbox" name="educations-__prefix__-is_current" class="form-check-input" id="id_educations-__prefix__-is_current">
+              <label class="form-check-label ms-1" for="id_educations-__prefix__-is_current">Currently enrolled</label>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Grade / GPA</label>
+            <input type="text" name="educations-__prefix__-grade" class="form-control" placeholder="e.g. 3.8 GPA">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="educations-__prefix__-description" class="form-control" rows="3" placeholder="Activities, achievements..."></textarea>
+          </div>
+        </div>
+      </div>
+    </template>
+
+        <button type="button" class="btn-add-entry" id="add-education">
+      <i class="bi bi-plus-circle me-2"></i>Add Another Degree
+    </button>
+    </div>
+
+    <div class="step-nav">
+        <a href="{% url 'cv:step' pk=cv.pk step=1 %}" class="btn-step-back">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+
+        <div class="d-flex gap-2">
+            <button type="submit" name="save_exit" class="btn-save-exit">
+        <i class="bi bi-floppy me-1"></i>Save & Exit
+      </button>
+
+            <button type="submit" class="btn-step-next">
+        Next: Experience <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+        </div>
+    </div>
+</form>
+{% endblock %} {% block step_js %}
+<script>
+    let eduCount = parseInt("{{ formset.total_form_count }}", 10);
+
+    document.getElementById('add-education').addEventListener('click', function() {
+        const tmpl = document.getElementById('empty-edu-template').content.cloneNode(true);
+        const entry = tmpl.querySelector('.formset-entry');
+        entry.innerHTML = entry.innerHTML.replace(/__prefix__/g, eduCount);
+        document.getElementById('education-entries').appendChild(entry);
+        document.getElementById('id_educations-TOTAL_FORMS').value = ++eduCount;
+        if (window.refreshEduPreview) window.refreshEduPreview();
+    });
+</script>
+{% endblock %}

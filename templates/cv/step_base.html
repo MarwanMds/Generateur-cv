@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  /* ── Step header ── */
+  .step-header { background: var(--primary); padding: 2rem 0; color: #fff; }
+  .step-header-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; }
+  .cv-title-badge {
+    display: inline-block; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8);
+    border-radius: 20px; padding: 0.25rem 0.9rem; font-size: 0.82rem; margin-bottom: 0.5rem;
+  }
+  .progress-wrap { margin-top: 1.2rem; }
+  .step-indicators { display: flex; align-items: center; gap: 0; margin-bottom: 0.5rem; }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700; flex-shrink: 0; transition: all 0.3s;
+  }
+  .step-dot.done     { background: #22c55e; color: #fff; }
+  .step-dot.active   { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px rgba(230,57,70,0.3); }
+  .step-dot.upcoming { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); }
+  .step-line { flex: 1; height: 2px; background: rgba(255,255,255,0.15); transition: background 0.3s; }
+  .step-line.done { background: #22c55e; }
+  .step-labels { display: flex; justify-content: space-between; margin-top: 0.4rem; }
+  .step-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-align: center; flex: 1; }
+  .step-label.active { color: #fff; font-weight: 600; }
+  .step-label.done   { color: #86efac; }
+
+  /* ── Two-column layout (shared across all steps) ── */
+  .step-two-col {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .step-two-col { grid-template-columns: 1fr; }
+    .preview-sticky { position: static !important; }
+  }
+
+  /* ── Live preview panel ── */
+  .preview-sticky { position: sticky; top: 80px; }
+  .preview-label {
+    font-size: .75rem; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .1em; margin-bottom: .5rem;
+  }
+  .preview-hint {
+    font-size: .68rem; color: var(--text-muted); text-align: center; margin-top: .4rem;
+  }
+
+  #cv-preview-panel {
+    --cv-primary: #1a1a2e;
+    --cv-secondary: #e63946;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 28px rgba(0,0,0,.13);
+    overflow: hidden;
+    font-size: 12.5px;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 480px;
+    transition: font-size .2s, font-family .2s;
+  }
+
+  /* Modern */
+  #cv-preview-panel.tmpl-modern { display: flex; }
+  #cv-preview-panel.tmpl-modern .preview-sidebar {
+    width: 130px; background: var(--cv-primary); color: #fff;
+    padding: 1rem .8rem; flex-shrink: 0; display: flex; flex-direction: column;
+  }
+  #cv-preview-panel.tmpl-modern .preview-main { flex: 1; padding: 1rem; }
+  #cv-preview-panel.tmpl-modern .preview-header-classic { border-bottom: none; padding-bottom: 0; margin-bottom: .6rem; }
+  #cv-preview-panel.tmpl-modern .prev-name { color: var(--cv-primary); }
+  #cv-preview-panel.tmpl-modern .prev-contact-row-classic { display: none; }
+
+  /* Classic */
+  #cv-preview-panel.tmpl-classic { display: block; padding: 1.2rem; }
+  #cv-preview-panel.tmpl-classic .preview-sidebar { display: none; }
+  #cv-preview-panel.tmpl-classic .preview-header-classic {
+    border-bottom: 3px solid var(--cv-primary); padding-bottom: .7rem; margin-bottom: .8rem;
+  }
+  #cv-preview-panel.tmpl-classic .prev-contact-row-classic { display: block; }
+
+  /* Minimal */
+  #cv-preview-panel.tmpl-minimal { display: block; padding: 1.2rem; border-left: 4px solid var(--cv-secondary); }
+  #cv-preview-panel.tmpl-minimal .preview-sidebar { display: none; }
+  #cv-preview-panel.tmpl-minimal .preview-header-classic { border-bottom: 1px solid #e5e7eb; padding-bottom: .6rem; margin-bottom: .8rem; }
+  #cv-preview-panel.tmpl-minimal .prev-contact-row-classic { display: block; }
+
+  /* Preview elements */
+  .prev-photo-wrap {
+    width: 55px; height: 55px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3);
+    overflow: hidden; margin: 0 auto .7rem; display: flex; align-items: center;
+    justify-content: center; background: rgba(255,255,255,.15);
+    font-weight: 700; font-size: 1rem; color: #fff;
+  }
+  .prev-photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+  .prev-name { font-weight: 900; font-size: 1em; line-height: 1.2; color: var(--cv-primary); margin-bottom: .15rem; }
+  .tmpl-modern .preview-main .prev-name { font-size: .95em; }
+  .tmpl-modern .preview-sidebar .prev-name { color: #fff; font-size: .85em; display: none; }
+
+  .prev-role { font-size: .75em; color: var(--cv-secondary); font-weight: 600; margin-bottom: .4rem; }
+  .tmpl-modern .preview-sidebar .prev-role { display: none; }
+
+  .prev-contact-row-classic { font-size: .68em; color: #6b7280; margin-top: .2rem; }
+  .prev-sep { margin: 0 .3rem; }
+
+  .prev-contact-item { font-size: .68em; color: rgba(255,255,255,.75); margin-bottom: .18rem; word-break: break-all; display: flex; align-items: flex-start; gap: .3rem; }
+  .tmpl-classic .prev-contact-item, .tmpl-minimal .prev-contact-item { color: #6b7280; display: inline-flex; margin-right: .5rem; margin-bottom: .2rem; }
+  .prev-icon { font-size: .7em; margin-top: .1em; flex-shrink: 0; }
+
+  .prev-section-label {
+    font-size: .6em; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--cv-secondary); margin: .7rem 0 .25rem; padding-bottom: .2rem;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+  }
+  .tmpl-classic .prev-section-label, .tmpl-minimal .prev-section-label { border-bottom-color: #e5e7eb; color: var(--cv-secondary); }
+
+  .prev-summary-text { font-size: .7em; color: #374151; line-height: 1.5; }
+  .prev-placeholder-line { height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); margin-bottom: 4px; }
+  .tmpl-classic .prev-placeholder-line, .tmpl-minimal .prev-placeholder-line { background: #e5e7eb; }
+
+  .prev-skill-item { font-size: .65em; color: rgba(255,255,255,.8); margin-bottom: .15rem; }
+  .tmpl-classic .prev-skill-item, .tmpl-minimal .prev-skill-item { display: inline-block; background: rgba(230,57,70,.07); color: var(--cv-primary); border-radius: 10px; padding: .1rem .45rem; margin: .1rem; }
+
+  .prev-data-row { margin-bottom: .5rem; }
+  .prev-data-title { font-size: .72em; font-weight: 700; color: var(--cv-primary); }
+  .prev-data-sub   { font-size: .65em; color: #6b7280; }
+  .prev-data-date  { font-size: .6em;  color: var(--cv-secondary); font-weight: 600; }
+
+  /* ── Form card ── */
+  .form-area { padding: 2rem 0 4rem; }
+  .form-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 1.8rem; margin-bottom: 1.2rem;
+  }
+  .form-card-title {
+    font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+    color: var(--primary); margin-bottom: 1.1rem; padding-bottom: .7rem;
+    border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: .5rem;
+  }
+  .form-card-title i { color: var(--accent); }
+
+  /* ── Formset entries ── */
+  .formset-entry {
+    background: #fafafa; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 1.4rem; margin-bottom: 1rem; position: relative;
+  }
+  .formset-entry:hover { border-color: #cbd5e1; }
+
+  .btn-add-entry {
+    background: rgba(230,57,70,0.07); color: var(--accent);
+    border: 1.5px dashed var(--accent); border-radius: 8px;
+    padding: .55rem 1.1rem; font-size: .88rem; font-weight: 600;
+    cursor: pointer; transition: all .2s; width: 100%; margin-top: .4rem;
+  }
+  .btn-add-entry:hover { background: rgba(230,57,70,.14); }
+
+  /* Delete row — hidden (we use X button instead) */
+  .delete-row { display: none !important; }
+
+  /* ── X remove button on formset entries ── */
+  .btn-remove-entry {
+    position: absolute; top: .65rem; right: .65rem;
+    width: 26px; height: 26px;
+    background: rgba(220,38,38,.08); border: 1.5px solid rgba(220,38,38,.2);
+    border-radius: 50%; color: #dc2626; font-size: .75rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .18s; padding: 0; line-height: 1;
+    z-index: 10;
+  }
+  .btn-remove-entry:hover {
+    background: #dc2626; border-color: #dc2626; color: #fff;
+    transform: scale(1.12);
+  }
+
+  /* Autosave indicator */
+  #autosave-indicator {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: #1a1a2e; color: #fff; border-radius: 20px;
+    padding: .45rem 1.1rem; font-size: .78rem; font-weight: 600;
+    display: flex; align-items: center; gap: .4rem;
+    opacity: 0; transition: opacity .3s; z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18); pointer-events: none;
+  }
+  #autosave-indicator.visible { opacity: 1; }
+  #autosave-indicator.saved   { background: #15803d; }
+  #autosave-indicator.error   { background: #dc2626; }
+
+  /* ── Nav buttons ── */
+  .step-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 1.8rem; gap: 1rem; flex-wrap: wrap;
+  }
+  .btn-step-back {
+    background: transparent; border: 1.5px solid var(--border); color: var(--text-muted);
+    font-weight: 600; border-radius: 8px; padding: .6rem 1.3rem;
+    text-decoration: none; transition: all .2s;
+  }
+  .btn-step-back:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-step-next {
+    background: var(--accent); color: #fff; border: none; font-weight: 700;
+    border-radius: 8px; padding: .65rem 1.7rem; cursor: pointer; transition: all .2s;
+  }
+  .btn-step-next:hover { background: var(--accent-light); transform: translateY(-1px); }
+  .btn-save-exit {
+    background: transparent; border: 1.5px solid var(--border); color: var(--text-muted);
+    font-size: .85rem; border-radius: 8px; padding: .5rem 1rem; cursor: pointer; transition: all .2s;
+  }
+  .btn-save-exit:hover { border-color: var(--text-muted); color: var(--text-main); }
+
+  /* ── Per-field styler (shared) ── */
+  .field-with-styler { position: relative; padding-right: 34px; }
+  .field-with-styler input,
+  .field-with-styler textarea,
+  .field-with-styler select { width: 100%; }
+  .field-style-toggle {
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    width: 28px; height: 28px; border: none; border-radius: 6px;
+    background: rgba(230,57,70,.1); color: #e63946; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .82rem; transition: background .15s; z-index: 5; padding: 0;
+  }
+  .field-style-toggle:hover { background: rgba(230,57,70,.22); }
+  .field-style-toggle.active { background: #e63946; color: #fff; }
+
+  .field-styler-popover {
+    display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 300;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.16); padding: 1rem; min-width: 280px;
+  }
+  .field-styler-popover.open { display: block; }
+  .styler-header {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: #6b7280; margin-bottom: .6rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .styler-header .field-label-name { color: #1a1a2e; }
+  .styler-close { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #9ca3af; line-height: 1; padding: 0; }
+  .styler-close:hover { color: #1a1a2e; }
+  .styler-row { margin-bottom: .5rem; }
+  .styler-label { font-size: .7rem; font-weight: 600; color: #6b7280; margin-bottom: .2rem; }
+  .styler-row select { font-size: .78rem; }
+  .styler-preview-text {
+    margin-top: .6rem; padding: .4rem .65rem; background: #f8fafc;
+    border-radius: 6px; border: 1px solid #e2e8f0; font-size: .88rem;
+    min-height: 30px; transition: all .2s; word-break: break-word;
+  }
+  .styler-reset-btn { margin-top: .5rem; font-size: .7rem; color: #e63946; background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+
+  /* Step 5 review */
+  .review-section { margin-bottom: 1.4rem; }
+  .review-section-title {
+    font-size: .68rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: .7rem; display: flex; align-items: center; gap: .5rem;
+  }
+  .review-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .review-item { background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding: .9rem 1.1rem; margin-bottom: .5rem; }
+  .review-item-title { font-weight: 700; font-size: .92rem; }
+  .review-item-sub  { color: var(--text-muted); font-size: .82rem; }
+  .review-item-date { font-size: .78rem; color: var(--accent); font-weight: 600; }
+  .skill-pill {
+    display: inline-block; background: rgba(230,57,70,0.08); color: var(--primary);
+    border: 1px solid rgba(230,57,70,0.2); border-radius: 20px;
+    padding: .18rem .75rem; font-size: .78rem; font-weight: 500; margin: .18rem;
+  }
+</style>
+{% block step_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<!-- ── Step Header ── -->
+<div class="step-header">
+  <div class="container">
+    <div class="cv-title-badge"><i class="bi bi-file-earmark-person me-1"></i>{{ cv.title }}</div>
+    <div class="step-header-title">{{ step_title }}</div>
+    <div class="progress-wrap">
+      <div class="step-indicators">
+        {% for i in "12345" %}
+          {% with num=forloop.counter %}
+            <div class="step-dot {% if num < step %}done{% elif num == step %}active{% else %}upcoming{% endif %}">
+              {% if num < step %}<i class="bi bi-check"></i>{% else %}{{ num }}{% endif %}
+            </div>
+            {% if not forloop.last %}
+              <div class="step-line {% if num < step %}done{% endif %}"></div>
+            {% endif %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+      <div class="step-labels">
+        {% for label in step_labels %}
+          <div class="step-label {% if forloop.counter < step %}done{% elif forloop.counter == step %}active{% endif %}">{{ label }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Form Area ── -->
+<div class="form-area">
+  <div class="container">
+    <div class="step-two-col">
+      <!-- LEFT: step content -->
+      <div>
+        {% block step_content %}{% endblock %}
+      </div>
+      <!-- RIGHT: live preview (shared) -->
+      {% include 'cv/partials/live_preview.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cv_preview.js' %}"></script>
+<script src="{% static 'js/field_styler.js' %}"></script>
+<script>
+// ── Initialize per-step JS ──
+window.FIELD_STYLES = {{ cv.get_field_styles_json|safe }};
+
+// ── Classic contact row: show/hide · separators dynamically ──
+(function () {
+  function updateClassicSeps() {
+    var phoneEl  = document.getElementById('id_phone');
+    var cityEl   = document.getElementById('id_city');
+    var sepPhone = document.getElementById('sep-phone');
+    var sepCity  = document.getElementById('sep-city');
+    if (sepPhone && phoneEl) sepPhone.style.display = (phoneEl.value.trim() ? '' : 'none');
+    if (sepCity  && cityEl)  sepCity.style.display  = (cityEl.value.trim()  ? '' : 'none');
+  }
+  ['id_phone','id_city'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateClassicSeps);
+  });
+  updateClassicSeps();
+})();
+
+// Toggle end_date when is_current checked
+document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+  if (cb.id && cb.id.includes('is_current')) {
+    const row = cb.closest('.formset-entry') || cb.closest('form');
+    const endInput = row ? row.querySelector('input[id*="end_date"]') : null;
+    if (endInput) {
+      const toggle = () => {
+        endInput.closest('div').style.opacity = cb.checked ? '0.4' : '1';
+        endInput.disabled = cb.checked;
+        if (cb.checked) endInput.value = '';
+      };
+      toggle();
+      cb.addEventListener('change', toggle);
+    }
+  }
+});
+</script>
+{% block step_js %}{% endblock %}
+
+<!-- ── Autosave indicator toast ── -->
+<div id="autosave-indicator">
+  <i class="bi bi-cloud-arrow-up-fill" id="autosave-icon"></i>
+  <span id="autosave-text">Saving…</span>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── 1. X-button on every .formset-entry ── */
+  function addRemoveBtn(entry) {
+    if (entry.querySelector('.btn-remove-entry')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-remove-entry';
+    btn.title = 'Remove';
+    btn.innerHTML = '<i class="bi bi-x"></i>';
+    btn.addEventListener('click', function () {
+      const delCb = entry.querySelector('input[type="checkbox"][name$="-DELETE"]');
+      if (delCb) {
+        delCb.checked = true;
+        entry.style.display = 'none';
+      } else {
+        entry.remove();
+      }
+      triggerAutosave();
+    });
+    entry.style.position = 'relative';
+    entry.prepend(btn);
+  }
+
+  document.querySelectorAll('.formset-entry').forEach(addRemoveBtn);
+
+  const _obs = new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      m.addedNodes.forEach(function (node) {
+        if (node.nodeType !== 1) return;
+        if (node.classList && node.classList.contains('formset-entry')) addRemoveBtn(node);
+        if (node.querySelectorAll) node.querySelectorAll('.formset-entry').forEach(addRemoveBtn);
+      });
+    });
+  });
+  _obs.observe(document.body, { childList: true, subtree: true });
+
+  /* ── 2. Autosave engine ── */
+  const indicator = document.getElementById('autosave-indicator');
+  const iconEl    = document.getElementById('autosave-icon');
+  const textEl    = document.getElementById('autosave-text');
+  let saveTimer   = null;
+  let hideTimer   = null;
+
+  function showIndicator(state, msg) {
+    clearTimeout(hideTimer);
+    indicator.className = 'visible ' + state;
+    iconEl.className = state === 'saving'
+      ? 'bi bi-cloud-arrow-up-fill'
+      : state === 'saved' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill';
+    textEl.textContent = msg;
+    if (state !== 'saving') {
+      hideTimer = setTimeout(function () { indicator.className = ''; }, 2500);
+    }
+  }
+
+  function triggerAutosave() {
+    clearTimeout(saveTimer);
+    showIndicator('saving', 'Saving…');
+    saveTimer = setTimeout(doSave, 1500);
+  }
+
+  function doSave() {
+    const form = document.querySelector('form[id^="step"]');
+    if (!form) return;
+    const stepMatch = window.location.pathname.match(/\/step\/(\d+)/);
+    const stepNum   = stepMatch ? stepMatch[1] : '1';
+    const cvPkMatch = window.location.pathname.match(/\/(\d+)\/step/);
+    const cvPk      = cvPkMatch ? cvPkMatch[1] : '';
+    if (!cvPk) return;
+
+    const url  = '/cv/' + cvPk + '/autosave/' + stepNum + '/';
+    const data = new FormData(form);
+    const fsInput = document.getElementById('id_field_styles');
+    if (fsInput) data.set('field_styles', fsInput.value);
+
+    fetch(url, { method: 'POST', body: data, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j.ok) showIndicator('saved', 'Saved ✓');
+        else { showIndicator('error', 'Couldn't save'); console.warn('Autosave errors:', j.errors); }
+      })
+      .catch(function () { showIndicator('error', 'No connection'); });
+  }
+
+  document.addEventListener('input',  function (e) { if (e.target.closest('form[id^="step"]')) triggerAutosave(); });
+  document.addEventListener('change', function (e) { if (e.target.closest('form[id^="step"]')) triggerAutosave(); });
+})();
+</script>
+{% endblock %}

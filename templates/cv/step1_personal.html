@@ -1,0 +1,242 @@
+{% extends 'cv/step_base.html' %} {% load static %} {% block title %}Step 1: Personal Info — CV Generator{% endblock %} {% block step_content %}
+<form method="post" enctype="multipart/form-data" novalidate id="step1-form">
+    {% csrf_token %} {{ form.field_styles }}
+
+    <!-- CV Settings -->
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-file-earmark-text"></i> CV Settings</div>
+        <div class="row g-3">
+            <div class="col-md-7">
+                <label class="form-label">CV Title <span class="text-danger">*</span></label>
+                <div class="field-with-styler" data-field-group="title">
+                    {{ form.title }}
+                    <button type="button" class="field-style-toggle" data-field="title" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="title" label="CV Title" %}
+                </div>
+                {% if form.title.errors %}
+                <div class="text-danger mt-1" style="font-size:.82rem">{{ form.title.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Template</label> {{ form.template }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Details -->
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-person-fill"></i> Personal Details</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                <div class="field-with-styler" data-field-group="full_name">
+                    {{ form.full_name }}
+                    <button type="button" class="field-style-toggle" data-field="full_name" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="full_name" label="Full Name" %}
+                </div>
+                {% if form.full_name.errors %}
+                <div class="text-danger mt-1" style="font-size:.82rem">{{ form.full_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Job Title</label>
+                <div class="field-with-styler" data-field-group="job_title">
+                    {{ form.job_title }}
+                    <button type="button" class="field-style-toggle" data-field="job_title" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="job_title" label="Job Title" %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <div class="field-with-styler" data-field-group="email">
+                    {{ form.email }}
+                    <button type="button" class="field-style-toggle" data-field="email" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="email" label="Email" %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <div class="field-with-styler" data-field-group="phone">
+                    {{ form.phone }}
+                    <button type="button" class="field-style-toggle" data-field="phone" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="phone" label="Phone" %}
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Profile Photo</label> {{ form.profile_photo }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-geo-alt-fill"></i> Address</div>
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Street Address</label>
+                <div class="field-with-styler" data-field-group="address">
+                    {{ form.address }}
+                    <button type="button" class="field-style-toggle" data-field="address" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="address" label="Address" %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">City</label>
+                <div class="field-with-styler" data-field-group="city">
+                    {{ form.city }}
+                    <button type="button" class="field-style-toggle" data-field="city" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="city" label="City" %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Country</label>
+                <div class="field-with-styler" data-field-group="country">
+                    {{ form.country }}
+                    <button type="button" class="field-style-toggle" data-field="country" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="country" label="Country" %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Postal Code</label>
+                <div class="field-with-styler" data-field-group="postal_code">
+                    {{ form.postal_code }}
+                    <button type="button" class="field-style-toggle" data-field="postal_code" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="postal_code" label="Postal Code" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Presence -->
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-link-45deg"></i> Online Presence</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-linkedin me-1" style="color:#0a66c2"></i>LinkedIn</label>
+                <div class="field-with-styler" data-field-group="linkedin">
+                    {{ form.linkedin }}
+                    <button type="button" class="field-style-toggle" data-field="linkedin" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="linkedin" label="LinkedIn" %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-github me-1"></i>GitHub</label>
+                <div class="field-with-styler" data-field-group="github">
+                    {{ form.github }}
+                    <button type="button" class="field-style-toggle" data-field="github" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="github" label="GitHub" %}
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label"><i class="bi bi-globe me-1" style="color:var(--accent)"></i>Website</label>
+                <div class="field-with-styler" data-field-group="website">
+                    {{ form.website }}
+                    <button type="button" class="field-style-toggle" data-field="website" title="Style this field"><i class="bi bi-type"></i></button> {% include 'cv/partials/styler_popover.html' with field_key="website" label="Website" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Summary -->
+    <div class="form-card">
+        <div class="form-card-title" style="justify-content:space-between;">
+            <span><i class="bi bi-card-text"></i> Professional Summary</span>
+            <button type="button" class="field-style-toggle" style="position:static;transform:none;width:auto;padding:0 8px;height:26px;font-size:.78rem;display:inline-flex;align-items:center;gap:4px;" data-field="summary" title="Style summary text">
+        <i class="bi bi-type"></i> <span style="font-size:.75rem;font-weight:600;">Style</span>
+      </button>
+        </div>
+        <div style="position:relative;">
+            {{ form.summary }}
+            <div class="field-styler-popover" id="styler-summary" data-field="summary" style="right:0;left:auto;">
+                <div class="styler-header">
+                    <span>Style: <span class="field-label-name">Summary</span></span>
+                    <button type="button" class="styler-close" data-close="summary">×</button>
+                </div>
+                <div class="styler-row">
+                    <div class="styler-label">Font Family</div>
+                    <select class="form-select form-select-sm styler-control" data-field="summary" data-prop="font_family">
+            <option value="">— inherit global —</option>
+            <option value="DM Sans">DM Sans</option><option value="Roboto">Roboto</option>
+            <option value="Open Sans">Open Sans</option><option value="Lato">Lato</option>
+            <option value="Montserrat">Montserrat</option><option value="Playfair Display">Playfair Display</option>
+            <option value="Raleway">Raleway</option><option value="Merriweather">Merriweather</option>
+            <option value="Nunito">Nunito</option><option value="Poppins">Poppins</option>
+          </select>
+                </div>
+                <div class="styler-row">
+                    <div class="styler-label">Font Size</div>
+                    <select class="form-select form-select-sm styler-control" data-field="summary" data-prop="font_size">
+            <option value="">— inherit —</option>
+            <option value="11px">11px</option><option value="12px">12px</option>
+            <option value="13px">13px</option><option value="14px">14px</option>
+            <option value="15px">15px</option><option value="16px">16px</option><option value="18px">18px</option>
+          </select>
+                </div>
+                <div class="styler-row">
+                    <div class="styler-label">Font Weight</div>
+                    <select class="form-select form-select-sm styler-control" data-field="summary" data-prop="font_weight">
+            <option value="">— inherit —</option>
+            <option value="300">300 – Light</option><option value="400">400 – Regular</option>
+            <option value="500">500 – Medium</option><option value="600">600 – Semi-Bold</option><option value="700">700 – Bold</option>
+          </select>
+                </div>
+                <div class="styler-row">
+                    <div class="styler-label">Style</div>
+                    <select class="form-select form-select-sm styler-control" data-field="summary" data-prop="font_style">
+            <option value="">— normal —</option><option value="italic">Italic</option>
+          </select>
+                </div>
+                <div class="styler-row">
+                    <div class="styler-label">Text Color</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="color" class="form-control form-control-color form-control-sm styler-control" style="width:44px;height:32px;padding:2px;" data-field="summary" data-prop="color" value="#000000">
+                        <input type="text" class="form-control form-control-sm styler-color-hex" data-field="summary" placeholder="#000000" maxlength="9" style="width:90px;font-family:monospace;font-size:.78rem;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary styler-clear-color" data-field="summary" style="font-size:.72rem;padding:2px 6px;">✕</button>
+                    </div>
+                </div>
+                <div class="styler-label" style="margin-top:.6rem;">Preview</div>
+                <div class="styler-preview-text" id="styler-preview-summary">Sample summary text...</div>
+                <button type="button" class="styler-reset-btn" data-field="summary">↩ Reset to default</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CV Design -->
+    <!-- <div class="form-card" style="background:linear-gradient(135deg,#1a1a2e 0%,#2d2d52 100%);color:#fff;border:none;">
+    <div class="form-card-title" style="color:#fff;border-bottom-color:rgba(255,255,255,.15);">
+      <i class="bi bi-palette2" style="color:var(--accent)"></i> CV Design
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="styler-label" style="color:rgba(255,255,255,.7);">Template Style</div>
+        {{ form.template }}
+      </div>
+      <div class="col-md-6">
+        <div class="styler-label" style="color:rgba(255,255,255,.7);">Global Font Family</div>
+        {{ form.font_family }}
+      </div>
+      <div class="col-md-6">
+        <div class="styler-label" style="color:rgba(255,255,255,.7);">Global Font Size</div>
+        {{ form.font_size }}
+      </div>
+      <div class="col-md-3">
+        <div class="styler-label" style="color:rgba(255,255,255,.7);">Primary Color</div>
+        <div class="d-flex align-items-center gap-2">
+          {{ form.primary_color }}
+          <span style="font-size:.78rem;color:rgba(255,255,255,.6);font-family:monospace;" id="lbl-primary-color">{{ form.primary_color.value }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="styler-label" style="color:rgba(255,255,255,.7);">Accent Color</div>
+        <div class="d-flex align-items-center gap-2">
+          {{ form.secondary_color }}
+          <span style="font-size:.78rem;color:rgba(255,255,255,.6);font-family:monospace;" id="lbl-secondary-color">{{ form.secondary_color.value }}</span>
+        </div>
+      </div>
+    </div>
+  </div>-->
+
+    <!-- Navigation -->
+    <div class="step-nav">
+        <a href="{% url 'dashboard:index' %}" class="btn-step-back">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+        <div class="d-flex gap-2">
+            <button type="submit" name="save_exit" class="btn-save-exit">
+        <i class="bi bi-floppy me-1"></i>Save
+      </button>
+            <button type="submit" class="btn-step-next">
+        Next: Education <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+        </div>
+    </div>
+
+</form>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'cv/step_base.html' %} {% load static %} {% block title %}Step 4: Skills & Languages — CV Generator{% endblock %} {% block step_content %}
+<form method="post" novalidate id="step4-form">
+    {% csrf_token %}
+
+    <!-- ── Skills ── -->
+    {{ skill_formset.management_form }}
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-tools"></i> Skills</div>
+        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.2rem;">Add technical skills, soft skills, and tools.</p>
+
+        <div id="skill-entries">
+            {% for form in skill_formset %}
+            <div class="formset-entry d-flex align-items-center gap-2 flex-wrap py-2">
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+                <div style="flex:2;min-width:140px;">
+                    {% if forloop.first %}<label class="form-label">Skill Name</label>{% endif %}
+                    <div class="field-with-styler" data-field-group="skill_name_{{ forloop.counter0 }}" style="padding-right:0;">
+                        {{ form.name }}
+                    </div>
+                </div>
+                <div style="flex:1;min-width:120px;">
+                    {% if forloop.first %}<label class="form-label">Category</label>{% endif %} {{ form.category }}
+                </div>
+                <div style="flex:1;min-width:140px;">
+                    {% if forloop.first %}<label class="form-label">Proficiency</label>{% endif %} {{ form.proficiency }}
+                </div>
+                {% if skill_formset.can_delete %}
+                <div style="padding-top:{% if forloop.first %}1.5rem{% else %}0{% endif %};">
+                    <div class="delete-row">{{ form.DELETE }} <label for="{{ form.DELETE.id_for_label }}" style="font-size:.78rem">Del</label></div>
+                </div>
+                {% endif %} {% if form.errors %}
+                <div class="text-danger w-100" style="font-size:.82rem">{{ form.errors }}</div>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <template id="empty-skill-template">
+      <div class="formset-entry d-flex align-items-center gap-2 flex-wrap py-2">
+        <div style="flex:2;min-width:140px;">
+          <input type="text" name="skills-__prefix__-name" class="form-control" placeholder="e.g. Python">
+        </div>
+        <div style="flex:1;min-width:120px;">
+          <select name="skills-__prefix__-category" class="form-select">
+            <option value="technical">Technical</option>
+            <option value="soft">Soft Skill</option>
+            <option value="tool">Tool / Software</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:140px;">
+          <select name="skills-__prefix__-proficiency" class="form-select">
+            <option value="1">Beginner</option>
+            <option value="2">Elementary</option>
+            <option value="3" selected>Intermediate</option>
+            <option value="4">Advanced</option>
+            <option value="5">Expert</option>
+          </select>
+        </div>
+        <div>
+          <div class="delete-row">
+            <input type="checkbox" name="skills-__prefix__-DELETE" class="form-check-input">
+            <label style="font-size:.78rem">Del</label>
+          </div>
+        </div>
+        <input type="hidden" name="skills-__prefix__-id" value="">
+        <input type="hidden" name="skills-__prefix__-cv" value="{{ cv.pk }}">
+      </div>
+    </template>
+
+        <button type="button" class="btn-add-entry" id="add-skill">
+      <i class="bi bi-plus-circle me-2"></i>Add Skill
+    </button>
+    </div>
+
+    <!-- ── Languages ── -->
+    {{ language_formset.management_form }}
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-translate"></i> Languages</div>
+
+        <div id="language-entries">
+            {% for form in language_formset %}
+            <div class="formset-entry d-flex align-items-center gap-2 flex-wrap py-2">
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                <div style="flex:2;min-width:160px;">
+                    {% if forloop.first %}<label class="form-label">Language</label>{% endif %}
+                    <div class="field-with-styler" data-field-group="lang_name_{{ forloop.counter0 }}" style="padding-right:0;">
+                        {{ form.name }}
+                    </div>
+                </div>
+                <div style="flex:2;min-width:180px;">
+                    {% if forloop.first %}<label class="form-label">Level</label>{% endif %} {{ form.level }}
+                </div>
+                {% if language_formset.can_delete %}
+                <div style="padding-top:{% if forloop.first %}1.5rem{% else %}0{% endif %};">
+                    <div class="delete-row">{{ form.DELETE }} <label for="{{ form.DELETE.id_for_label }}" style="font-size:.78rem">Del</label></div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <template id="empty-lang-template">
+      <div class="formset-entry d-flex align-items-center gap-2 flex-wrap py-2">
+        <div style="flex:2;min-width:160px;">
+          <input type="text" name="languages-__prefix__-name" class="form-control" placeholder="e.g. English">
+        </div>
+        <div style="flex:2;min-width:180px;">
+          <select name="languages-__prefix__-level" class="form-select">
+            <option value="A1">A1 – Beginner</option>
+            <option value="A2">A2 – Elementary</option>
+            <option value="B1">B1 – Intermediate</option>
+            <option value="B2">B2 – Upper Intermediate</option>
+            <option value="C1">C1 – Advanced</option>
+            <option value="C2">C2 – Proficient</option>
+            <option value="native">Native / Bilingual</option>
+          </select>
+        </div>
+        <div>
+          <div class="delete-row">
+            <input type="checkbox" name="languages-__prefix__-DELETE" class="form-check-input">
+            <label style="font-size:.78rem">Del</label>
+          </div>
+        </div>
+        <input type="hidden" name="languages-__prefix__-id" value="">
+        <input type="hidden" name="languages-__prefix__-cv" value="{{ cv.pk }}">
+      </div>
+    </template>
+
+        <button type="button" class="btn-add-entry" id="add-language">
+      <i class="bi bi-plus-circle me-2"></i>Add Language
+    </button>
+    </div>
+
+    <!-- ── Interests ── -->
+    {{ interest_formset.management_form }}
+    <div class="form-card">
+        <div class="form-card-title"><i class="bi bi-heart"></i> Interests & Hobbies</div>
+
+        <div id="interest-entries" class="d-flex flex-wrap gap-2 align-items-center">
+            {% for form in interest_formset %}
+            <div class="d-flex align-items-center gap-1">
+                {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %} {{ form.name }} {% if interest_formset.can_delete %}
+                <div class="delete-row ms-1">{{ form.DELETE }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <template id="empty-interest-template">
+      <div class="d-flex align-items-center gap-1">
+        <input type="text" name="interests-__prefix__-name" class="form-control" placeholder="e.g. Photography" style="width:160px">
+        <input type="hidden" name="interests-__prefix__-id" value="">
+        <input type="hidden" name="interests-__prefix__-cv" value="{{ cv.pk }}">
+      </div>
+    </template>
+
+        <button type="button" class="btn-add-entry mt-2" id="add-interest" style="width:auto;padding:.5rem 1rem;">
+      <i class="bi bi-plus-circle me-2"></i>Add Interest
+    </button>
+    </div>
+
+    <div class="step-nav">
+        <a href="{% url 'cv:step' pk=cv.pk step=3 %}" class="btn-step-back">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <div class="d-flex gap-2">
+            <button type="submit" name="save_exit" class="btn-save-exit">
+        <i class="bi bi-floppy me-1"></i>Save & Exit
+      </button>
+            <button type="submit" class="btn-step-next">
+        Review CV <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+        </div>
+    </div>
+</form>
+{% endblock %} {% block step_js %}
+<script>
+    function addFormsetEntry(btnId, containerId, templateId, totalFormsInputId) {
+        let count = parseInt(document.getElementById(totalFormsInputId).value, 10);
+        document.getElementById(btnId).addEventListener('click', function() {
+            const tmpl = document.getElementById(templateId).content.cloneNode(true);
+            const el = tmpl.firstElementChild;
+            el.innerHTML = el.innerHTML.replace(/__prefix__/g, count);
+            document.getElementById(containerId).appendChild(el);
+            document.getElementById(totalFormsInputId).value = ++count;
+            refreshSkillPreview();
+        });
+    }
+
+    addFormsetEntry('add-skill', 'skill-entries', 'empty-skill-template', 'id_skills-TOTAL_FORMS');
+    addFormsetEntry('add-language', 'language-entries', 'empty-lang-template', 'id_languages-TOTAL_FORMS');
+    addFormsetEntry('add-interest', 'interest-entries', 'empty-interest-template', 'id_interests-TOTAL_FORMS');
+
+    // All live preview refresh is handled by cv_preview.js (window.refreshSkillPreview, etc.)
+    // Patch addFormsetEntry to also fire refresh after inserting a new row:
+    const _origAddFormsetEntry = addFormsetEntry;
+
+    function addFormsetEntryWithRefresh(btnId, containerId, templateId, totalFormsInputId) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            // Short delay lets DOM settle before refresh
+            setTimeout(function() {
+                if (containerId === 'skill-entries' && window.refreshSkillPreview) window.refreshSkillPreview();
+                if (containerId === 'language-entries' && window.refreshLangPreview) window.refreshLangPreview();
+                if (containerId === 'interest-entries' && window.refreshInterestPreview) window.refreshInterestPreview();
+            }, 50);
+        });
+    }
+    addFormsetEntryWithRefresh('add-skill', 'skill-entries', 'empty-skill-template', 'id_skills-TOTAL_FORMS');
+    addFormsetEntryWithRefresh('add-language', 'language-entries', 'empty-lang-template', 'id_languages-TOTAL_FORMS');
+    addFormsetEntryWithRefresh('add-interest', 'interest-entries', 'empty-interest-template', 'id_interests-TOTAL_FORMS');
+</script>
+{% endblock %}

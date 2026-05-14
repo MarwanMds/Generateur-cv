@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — CV Generator{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout ───────────────────────────────────────────── */
+.dashboard-root {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: calc(100vh - 64px);
+    background: var(--surface);
+}
+@media (max-width: 991px) {
+    .dashboard-root { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* ── Sidebar ──────────────────────────────────────────── */
+.sidebar {
+    background: #fff;
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+}
+
+.avatar-wrap {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 1rem;
+}
+.avatar-img {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 0 4px rgba(230,57,70,.12);
+}
+.avatar-placeholder {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, #2d2d52 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 900; color: #fff; letter-spacing: -1px;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 0 4px rgba(230,57,70,.12);
+}
+.avatar-edit-btn {
+    position: absolute; bottom: 0; right: 0;
+    width: 26px; height: 26px;
+    background: var(--accent); border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: .65rem; text-decoration: none;
+    transition: transform .15s;
+}
+.avatar-edit-btn:hover { transform: scale(1.15); color: #fff; }
+
+.profile-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700; color: var(--primary);
+    text-align: center; margin-bottom: .2rem; line-height: 1.2;
+}
+.profile-headline {
+    font-size: .82rem; color: var(--accent); font-weight: 600;
+    text-align: center; margin-bottom: 1.25rem;
+}
+
+.sidebar-divider {
+    border: none; border-top: 1px solid var(--border); margin: 1rem 0;
+}
+
+.sidebar-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: .5rem;
+}
+.stat-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: .55rem .4rem; text-align: center;
+}
+.stat-pill-num {
+    font-family: var(--font-display);
+    font-size: 1.3rem; font-weight: 900; color: var(--primary); line-height: 1;
+}
+.stat-pill-label {
+    font-size: .68rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem;
+}
+
+.info-row {
+    display: flex; align-items: flex-start; gap: .6rem;
+    margin-bottom: .65rem; font-size: .82rem; color: var(--text-muted); word-break: break-all;
+}
+.info-row i { flex-shrink: 0; color: var(--accent); font-size: .9rem; margin-top: .05rem; }
+.info-row a { color: var(--text-muted); text-decoration: none; transition: color .15s; }
+.info-row a:hover { color: var(--accent); }
+
+.social-link {
+    display: flex; align-items: center; gap: .55rem;
+    padding: .45rem .75rem; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    font-size: .8rem; font-weight: 600; color: var(--text-main);
+    text-decoration: none; transition: all .2s; word-break: break-all;
+    margin-bottom: .5rem;
+}
+.social-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(230,57,70,.04); }
+.social-link i { font-size: 1rem; flex-shrink: 0; }
+.social-link .link-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.edit-profile-btn {
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    width: 100%; padding: .6rem; border-radius: 9px;
+    border: 1.5px solid var(--border); background: #fff;
+    color: var(--text-muted); font-size: .82rem; font-weight: 600;
+    text-decoration: none; transition: all .2s; margin-top: 1.5rem;
+}
+.edit-profile-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+
+/* ── Main content ────────────────────────────────────── */
+.main-area { padding: 2rem 2rem 3rem; }
+
+.main-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;
+}
+.main-title {
+    font-family: var(--font-display); font-size: 1.5rem; font-weight: 900;
+    color: var(--primary); line-height: 1;
+}
+.main-subtitle { font-size: .85rem; color: var(--text-muted); margin-top: .25rem; }
+
+.btn-new-cv {
+    background: var(--accent); color: #fff !important; font-weight: 700;
+    border-radius: 10px; padding: .65rem 1.4rem; font-size: .9rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: .4rem;
+    border: none; transition: background .2s, transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 12px rgba(230,57,70,.25); white-space: nowrap;
+}
+.btn-new-cv:hover {
+    background: var(--accent-light); transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(230,57,70,.35); color: #fff !important;
+}
+
+/* ── CV Cards grid ───────────────────────────────────── */
+.cv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.25rem;
+}
+
+.cv-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.4rem;
+    transition: all .25s; position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.cv-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: var(--radius) var(--radius) 0 0; background: var(--accent);
+    transform: scaleX(0); transform-origin: left; transition: transform .25s;
+}
+.cv-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(26,26,46,.1); }
+.cv-card:hover::after { transform: scaleX(1); }
+
+.cv-card-head {
+    display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .6rem;
+}
+.cv-template-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: rgba(230,57,70,.08); color: var(--accent);
+    border-radius: 20px; padding: .18rem .65rem;
+    font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+}
+.status-badge {
+    font-size: .75rem; font-weight: 600; display: inline-flex; align-items: center; gap: .25rem;
+}
+.status-badge.complete { color: #22c55e; }
+.status-badge.draft    { color: #f59e0b; }
+
+.cv-card-title {
+    font-weight: 700; font-size: 1rem; color: var(--primary);
+    margin-bottom: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cv-card-name { font-size: .83rem; color: var(--text-muted); margin-bottom: .1rem; }
+.cv-card-role { font-size: .8rem; color: var(--accent); font-weight: 600; margin-bottom: .7rem; }
+
+.prog-wrap { background: var(--border); border-radius: 4px; height: 5px; overflow: hidden; margin: .5rem 0 .3rem; }
+.prog-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%); transition: width .4s ease;
+}
+.cv-card-meta { font-size: .77rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+.color-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block; margin-right: .3rem; vertical-align: middle;
+    border: 1px solid rgba(0,0,0,.08);
+}
+
+.cv-actions { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: auto; padding-top: .5rem; }
+.btn-cv-action {
+    flex: 1; min-width: 0;
+    display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+    border-radius: 8px; font-size: .78rem; font-weight: 600; padding: .42rem .5rem;
+    text-decoration: none; border: 1.5px solid transparent; cursor: pointer;
+    transition: all .18s; white-space: nowrap; background: none;
+}
+.btn-cv-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-cv-primary:hover { background: #2d2d52; border-color: #2d2d52; color: #fff; }
+.btn-cv-ghost { color: var(--text-muted); border-color: var(--border); flex: 0 0 auto; }
+.btn-cv-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.btn-cv-danger { color: var(--text-muted); border-color: var(--border); flex: 0 0 auto; }
+.btn-cv-danger:hover { border-color: #e63946; color: #e63946; }
+
+/* ── Empty state ─────────────────────────────────────── */
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 5rem 1rem; }
+.empty-icon {
+    width: 80px; height: 80px; background: rgba(230,57,70,.07);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 2rem; color: var(--accent);
+}
+.empty-state h4 { font-family: var(--font-display); font-weight: 700; color: var(--primary); margin-bottom: .5rem; }
+.empty-state p { color: var(--text-muted); max-width: 320px; margin: 0 auto 1.75rem; font-size: .9rem; }
+
+/* Section label */
+.section-label {
+    font-size: .72rem; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem;
+}
+
+@media (max-width: 767px) {
+    .main-area { padding: 1.25rem 1rem 2rem; }
+    .cv-grid { grid-template-columns: 1fr; }
+    .sidebar { height: auto; position: static; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-root">
+
+  <!-- ══════════════════════════════════════════════════
+       LEFT SIDEBAR — Profile
+  ═══════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Avatar -->
+    <div class="avatar-wrap">
+      {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="Profile photo" class="avatar-img">
+      {% else %}
+        <div class="avatar-placeholder">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+      {% endif %}
+      <a href="{% url 'accounts:profile' %}" class="avatar-edit-btn" title="Edit profile">
+        <i class="bi bi-pencil-fill"></i>
+      </a>
+    </div>
+
+    <!-- Name + Headline -->
+    <div class="profile-name">{{ profile.get_full_name }}</div>
+    {% if profile.headline %}
+      <div class="profile-headline">{{ profile.headline }}</div>
+    {% else %}
+      <div class="profile-headline" style="color:var(--text-muted);font-style:italic;">No headline set</div>
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="sidebar-stats">
+      <div class="stat-pill">
+        <div class="stat-pill-num">{{ cv_count }}</div>
+        <div class="stat-pill-label">CVs</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num" style="color:#22c55e;">{{ complete }}</div>
+        <div class="stat-pill-label">Done</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num" style="color:#f59e0b;">{{ drafts }}</div>
+        <div class="stat-pill-label">Draft</div>
+      </div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <!-- Contact Info -->
+    <div class="section-label">Contact</div>
+
+    {% if profile.phone %}
+    <div class="info-row">
+      <i class="bi bi-telephone-fill"></i>
+      <span>{{ profile.phone }}</span>
+    </div>
+    {% endif %}
+
+    {% if user.email %}
+    <div class="info-row">
+      <i class="bi bi-envelope-fill"></i>
+      <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+    </div>
+    {% endif %}
+
+    {% if profile.city or profile.country %}
+    <div class="info-row">
+      <i class="bi bi-geo-alt-fill"></i>
+      <span>{{ profile.city }}{% if profile.city and profile.country %}, {% endif %}{{ profile.country }}</span>
+    </div>
+    {% endif %}
+
+    {% if not profile.phone and not user.email and not profile.city %}
+    <div class="info-row" style="font-style:italic;">
+      <i class="bi bi-info-circle"></i>
+      <span>No contact info yet</span>
+    </div>
+    {% endif %}
+
+    <hr class="sidebar-divider">
+
+    <!-- Social Links -->
+    <div class="section-label">Links</div>
+
+    {% if profile.linkedin_url %}
+    <a href="{{ profile.linkedin_url }}" target="_blank" rel="noopener" class="social-link">
+      <i class="bi bi-linkedin" style="color:#0a66c2;"></i>
+      <span class="link-label">LinkedIn</span>
+      <i class="bi bi-arrow-up-right-square ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+    </a>
+    {% endif %}
+
+    {% if profile.github_url %}
+    <a href="{{ profile.github_url }}" target="_blank" rel="noopener" class="social-link">
+      <i class="bi bi-github" style="color:#24292f;"></i>
+      <span class="link-label">GitHub</span>
+      <i class="bi bi-arrow-up-right-square ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+    </a>
+    {% endif %}
+
+    {% if profile.website_url %}
+    <a href="{{ profile.website_url }}" target="_blank" rel="noopener" class="social-link">
+      <i class="bi bi-globe2" style="color:var(--accent);"></i>
+      <span class="link-label">Website</span>
+      <i class="bi bi-arrow-up-right-square ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+    </a>
+    {% endif %}
+
+    {% if not profile.linkedin_url and not profile.github_url and not profile.website_url %}
+    <div class="info-row" style="font-style:italic;">
+      <i class="bi bi-link-45deg"></i>
+      <span>No links added yet</span>
+    </div>
+    {% endif %}
+
+    {% if profile.bio %}
+    <hr class="sidebar-divider">
+    <div class="section-label">About</div>
+    <p style="font-size:.8rem;color:var(--text-muted);line-height:1.55;margin:0;">{{ profile.bio|truncatechars:200 }}</p>
+    {% endif %}
+
+    <!-- Edit profile CTA -->
+    <a href="{% url 'accounts:profile' %}" class="edit-profile-btn">
+      <i class="bi bi-person-gear"></i>
+      Edit Profile
+    </a>
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════
+       RIGHT MAIN AREA — CV Cards
+  ═══════════════════════════════════════════════════ -->
+  <main class="main-area">
+
+    <div class="main-topbar">
+      <div>
+        <div class="main-title">My CVs</div>
+        <div class="main-subtitle">
+          Welcome back, <strong>{{ user.first_name|default:user.username }}</strong>!
+          {% if fav_template %}&mdash; Favourite template: <span style="color:var(--accent);font-weight:600;">{{ fav_template|capfirst }}</span>{% endif %}
+        </div>
+      </div>
+      <a href="{% url 'cv:new' %}" class="btn-new-cv">
+        <i class="bi bi-plus-lg"></i>New CV
+      </a>
+    </div>
+
+    <div class="cv-grid">
+
+      {% if cvs %}
+        {% for cv in cvs %}
+        <div class="cv-card">
+
+          <div class="cv-card-head">
+            <span class="cv-template-badge">
+              {% if cv.template == 'modern' %}<i class="bi bi-lightning-fill"></i>
+              {% elif cv.template == 'classic' %}<i class="bi bi-bookmark-fill"></i>
+              {% else %}<i class="bi bi-layers-fill"></i>{% endif %}
+              {{ cv.get_template_display }}
+            </span>
+            {% if cv.is_complete %}
+            <span class="status-badge complete"><i class="bi bi-check-circle-fill"></i>Done</span>
+            {% else %}
+            <span class="status-badge draft"><i class="bi bi-pencil-fill"></i>Draft</span>
+            {% endif %}
+          </div>
+
+          <!-- Color preview dots -->
+          <div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.5rem;">
+            <span class="color-dot" style="background:{{ cv.primary_color }};"></span>
+            <span class="color-dot" style="background:{{ cv.secondary_color }};"></span>
+            <span style="font-size:.7rem;color:var(--text-muted);">{{ cv.font_family }}</span>
+          </div>
+
+          <div class="cv-card-title" title="{{ cv.title }}">{{ cv.title }}</div>
+          {% if cv.full_name %}<div class="cv-card-name"><i class="bi bi-person-fill me-1" style="opacity:.5;"></i>{{ cv.full_name }}</div>{% endif %}
+          {% if cv.job_title %}<div class="cv-card-role">{{ cv.job_title }}</div>{% endif %}
+
+          <div class="prog-wrap">
+            <div class="prog-fill" style="width:{{ cv.get_completion_percentage }}%;"></div>
+          </div>
+          <div class="cv-card-meta">
+            Step {{ cv.current_step }}/5 &middot; {{ cv.get_completion_percentage }}% &middot; {{ cv.updated_at|timesince }} ago
+          </div>
+
+          <div class="cv-actions">
+            <a href="{% url 'cv:step' pk=cv.pk step=cv.current_step %}" class="btn-cv-action btn-cv-primary">
+              <i class="bi bi-pencil"></i>{% if cv.is_complete %}Edit{% else %}Continue{% endif %}
+            </a>
+            <a href="{% url 'cv:step' pk=cv.pk step=5 %}" class="btn-cv-action btn-cv-ghost" title="Preview">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'export:pdf' pk=cv.pk %}" class="btn-cv-action btn-cv-ghost" title="Export PDF">
+              <i class="bi bi-file-earmark-pdf"></i>
+            </a>
+            <form method="post" action="{% url 'cv:delete' pk=cv.pk %}" style="display:contents;"
+                  onsubmit="return confirm('Delete \'{{ cv.title }}\'? This cannot be undone.')">
+              {% csrf_token %}
+              <button type="submit" class="btn-cv-action btn-cv-danger" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-file-earmark-plus"></i></div>
+          <h4>No CVs yet</h4>
+          <p>Create your first professional CV in minutes — choose a template, fill your details, export as PDF.</p>
+          <a href="{% url 'cv:new' %}" class="btn-new-cv" style="display:inline-flex;">
+            <i class="bi bi-plus-lg"></i>Create My First CV
+          </a>
+        </div>
+      {% endif %}
+
+    </div><!-- /cv-grid -->
+  </main>
+
+</div><!-- /dashboard-root -->
+{% endblock %}
